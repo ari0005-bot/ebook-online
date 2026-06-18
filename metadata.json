@@ -1,0 +1,6 @@
+{
+  "name": "Sistem Website Ebook Online",
+  "description": "Platform membaca, membeli, dan mengelola ebook online secara interaktif, lengkap dengan Reader Ebook, Dashboard Admin, Keranjang Belanja, dan Manajemen Buku.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
