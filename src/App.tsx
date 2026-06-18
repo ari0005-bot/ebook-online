@@ -18,7 +18,9 @@ import PresentationEnd from './components/PresentationEnd';
 
 import { 
   BookOpen, ShoppingCart, User as UserIcon, LogOut, Laptop, Sparkles, 
-  Search, ArrowRight, Star, Heart, FileText, Check, ShieldAlert, BadgePlus, HelpCircle, X
+  Search, ArrowRight, Star, Heart, FileText, Check, ShieldAlert, BadgePlus, HelpCircle, X,
+  Library, Users, Download, ShieldCheck, Zap, Quote, PenTool, Headphones, ChevronRight,
+  Instagram, Twitter, Facebook, Youtube, Mail
 } from 'lucide-react';
 
 export default function App() {
@@ -320,6 +322,37 @@ export default function App() {
 
   // Filter list of popular ebooks (Popularity rating > 4.6 or flag)
   const popularEbooks = ebooks.filter(eb => eb.isPopular).slice(0, 4);
+  const featuredEbook = ebooks.find(eb => eb.isPopular) || ebooks[0];
+
+  // Aggregate stats untuk hero/landing band
+  const totalReaders = 12400;
+  const avgRating = ebooks.length
+    ? (ebooks.reduce((sum, eb) => sum + eb.rating, 0) / ebooks.length).toFixed(1)
+    : '4.8';
+  const landingStats = [
+    { value: `${ebooks.length}+`, label: 'Judul Pilihan', icon: Library },
+    { value: `${(totalReaders / 1000).toFixed(1)}rb+`, label: 'Pembaca Aktif', icon: Users },
+    { value: `${avgRating}`, label: 'Rata-rata Rating', icon: Star },
+    { value: '100%', label: 'Akses Selamanya', icon: ShieldCheck },
+  ];
+
+  // Keunggulan platform untuk section "mengapa memilih kami"
+  const platformFeatures = [
+    { icon: BookOpen, title: 'Reader Premium Bebas Distraksi', desc: 'Antarmuka membaca yang bersih dengan kontrol tema, ukuran huruf, dan bookmark cerdas.' },
+    { icon: Download, title: 'Koleksi Pribadi Selamanya', desc: 'Sekali beli, ebook langsung tersimpan permanen di pustaka digital pribadi Anda.' },
+    { icon: Zap, title: 'Akses Instan & Cepat', desc: 'Mulai membaca dalam hitungan detik setelah checkout, tanpa proses unduh yang ribet.' },
+    { icon: ShieldCheck, title: 'Transaksi Aman & Transparan', desc: 'Pembayaran dengan saldo digital yang aman, lengkap dengan riwayat invoice yang rapi.' },
+  ];
+
+  // Map kategori ke ikon elegan (lewati "Semua Kategori")
+  const categoryIcons: Record<string, typeof BookOpen> = {
+    'Pengembangan Diri': Sparkles,
+    'Teknologi & Koding': PenTool,
+    'Sastra & Fiksi': BookOpen,
+    'Bisnis & Finansial': Zap,
+    'Edukasi & Sains': Library,
+    'Culinary & Hobi': Heart,
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans select-none pb-12">
@@ -457,224 +490,372 @@ export default function App() {
         
         {/* TAB 1: LANDING PAGE SCREEN (Promo, populars, chips, article briefs, testimonials) */}
         {activePage === 'home' && (
-          <div className="space-y-16 py-4">
-            
-            {/* HERO PROMOTIONAL BANNER SECTION */}
-            <section className="max-w-7xl mx-auto px-4 pt-4">
-              <div className="bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-800 rounded-3xl p-8 md:p-12 text-white relative overflow-hidden shadow-lg flex flex-col md:flex-row justify-between items-center gap-8 shadow-blue-500/10">
-                <div className="space-y-6 max-w-xl text-center md:text-left">
-                  <span className="px-3 py-1 bg-white/20 text-white font-bold text-[10px] md:text-xs rounded-full uppercase tracking-widest">
-                    🔥 PROMO SPESIAL PERPUSTAKAAN DIGITAL
+          <div className="space-y-20 md:space-y-28 pb-8">
+
+            {/* ===== HERO SECTION ===== */}
+            <section className="relative overflow-hidden">
+              {/* Soft decorative background */}
+              <div className="absolute inset-0 -z-10 bg-gradient-to-b from-indigo-50/80 via-white to-slate-50" />
+              <div className="absolute -top-24 -right-24 -z-10 w-[28rem] h-[28rem] bg-indigo-300/30 rounded-full blur-3xl" />
+              <div className="absolute -bottom-32 -left-24 -z-10 w-[26rem] h-[26rem] bg-violet-300/20 rounded-full blur-3xl" />
+
+              <div className="max-w-7xl mx-auto px-6 pt-12 md:pt-20 pb-4 grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+                {/* Left copy */}
+                <motion.div
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, ease: 'easeOut' }}
+                  className="space-y-7 text-center lg:text-left"
+                >
+                  <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-white border border-indigo-100 text-indigo-700 font-bold text-[11px] rounded-full uppercase tracking-widest shadow-sm">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                    Perpustakaan Digital Premium
                   </span>
-                  
-                  <h2 className="text-3xl md:text-5xl font-black tracking-tight leading-tight">
-                    Aplikasi Baca & Koleksi <span className="underline decoration-wavy decoration-amber-450">Ebook Terbaik</span> Anda.
-                  </h2>
-                  <p className="text-slate-200 text-xs md:text-sm leading-relaxed max-w-lg">
-                    Dapatkan akses instan ke karya-karya sastra terbaik, modul teknologi pemrograman modern, hingga motivasi pengembangan diri terlaris, lengkap dengan Reader Ebook premium bebas distraksi.
+
+                  <h1 className="text-4xl md:text-6xl font-black tracking-tight leading-[1.05] text-slate-900">
+                    Baca, koleksi, dan
+                    <span className="block bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-500 bg-clip-text text-transparent">
+                      jatuh cinta pada buku.
+                    </span>
+                  </h1>
+
+                  <p className="text-sm md:text-base text-slate-500 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                    Ribuan ebook pilihan — dari sastra, pengembangan diri, hingga teknologi — siap dibaca instan dengan pengalaman <span className="text-slate-700 font-semibold">Reader premium bebas distraksi</span>. Semua dalam satu pustaka elegan.
                   </p>
-                  
-                  <div className="flex flex-col sm:flex-row gap-3 pt-2 justify-center md:justify-start">
+
+                  <div className="flex flex-col sm:flex-row gap-3 pt-1 justify-center lg:justify-start">
                     <button
                       onClick={() => setActivePage('catalog')}
-                      className="px-6 py-3 bg-white text-blue-700 hover:bg-slate-105 rounded-xl text-xs font-black shadow-md cursor-pointer flex items-center justify-center gap-2"
+                      className="group px-7 py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-sm font-bold shadow-lg shadow-slate-900/15 cursor-pointer flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
                     >
-                      <span>Jelajahi Katalog Buku</span>
-                      <ArrowRight className="w-4 h-4" />
+                      <span>Jelajahi Katalog</span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                     <button
                       onClick={() => setActivePage('presentation')}
-                      className="px-6 py-3 bg-white/10 hover:bg-white/15 text-white border border-white/20 rounded-xl text-xs font-bold cursor-pointer"
+                      className="px-7 py-3.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-2xl text-sm font-bold cursor-pointer transition-all flex items-center justify-center gap-2"
                     >
-                      Brosur Info Keunggulan
+                      <Sparkles className="w-4 h-4 text-indigo-500" />
+                      Keunggulan Platform
                     </button>
                   </div>
-                </div>
 
-                {/* Right Hero Cover Deco Art */}
-                <div className="relative w-full max-w-[240px] md:max-w-[280px] aspect-[4/5] shrink-0 bg-transparent flex items-center justify-center z-10">
-                  <div className="absolute inset-0 bg-indigo-650/40 rounded-3xl shrink shadow-lg rotate-6 translate-x-3 scale-95" />
-                  <div className="absolute inset-0 bg-blue-500/20 rounded-3xl shrink shadow-lg -rotate-3 -translate-x-1" />
-                  <div className="bg-slate-900 border border-white/20 rounded-2xl overflow-hidden aspect-[3/4] w-full shadow-2xl relative">
-                    <img
-                      src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400"
-                      alt="Filosofi Teras"
-                      referrerPolicy="no-referrer"
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black to-transparent p-4 flex justify-between items-end">
-                      <span className="text-[10px] text-white/80 font-mono">HOT TITLE</span>
-                      <span className="bg-amber-400 text-slate-900 text-[9px] font-bold px-2 py-0.5 rounded uppercase">POPULER</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* EBOOK POPULER SECTION CAROUSEL */}
-            <section className="max-w-7xl mx-auto px-4">
-              <div className="flex justify-between items-end mb-8 border-b border-slate-100 pb-3">
-                <div>
-                  <h3 className="text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight">
-                    🔥 Ebook <span className="text-primary-color text-blue-600">Terpopuler</span> Saat Ini
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-1">Ulasan rating bintang tertinggi yang dikonsumsi oleh ribuan pembaca aktif harian.</p>
-                </div>
-                <button
-                  onClick={() => setActivePage('catalog')}
-                  className="text-xs font-bold text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1 cursor-pointer"
-                >
-                  <span>Lihat Semua ({ebooks.length})</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Grid cards carousel */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                {popularEbooks.map(eb => (
-                  <div 
-                    key={eb.id}
-                    className="bg-white rounded-2xl border border-slate-100 p-4 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between group cursor-pointer"
-                    onClick={() => { setSelectedEbook(eb); setActivePage('detail'); }}
-                  >
-                    <div className="space-y-3">
-                      <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-slate-100">
+                  {/* Social proof */}
+                  <div className="flex items-center gap-4 justify-center lg:justify-start pt-3">
+                    <div className="flex -space-x-3">
+                      {INITIAL_TESTIMONIALS.slice(0, 4).map((t) => (
                         <img
-                          src={eb.coverUrl}
-                          alt={eb.title}
+                          key={t.id}
+                          src={t.avatar}
+                          alt={t.name}
                           referrerPolicy="no-referrer"
-                          className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-300"
+                          className="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm"
                         />
-                        <span className="absolute bottom-2 right-2 bg-slate-900/85 text-amber-400 px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1">
-                          <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" /> {eb.rating}
-                        </span>
-                      </div>
-                      <div className="space-y-1">
-                        <span className="text-[9px] font-bold uppercase text-blue-600">{eb.category}</span>
-                        <h4 className="font-bold text-slate-805 leading-snug line-clamp-2 text-sm">{eb.title}</h4>
-                        <p className="text-xs text-slate-400">Oleh {eb.author}</p>
-                      </div>
+                      ))}
                     </div>
-
-                    <div className="mt-3 pt-3 border-t border-slate-50 flex justify-between items-center">
-                      <span className="font-bold text-slate-700 text-xs">
-                        {eb.price === 0 ? 'GRATIS' : `Rp ${eb.price.toLocaleString('id-ID')}`}
-                      </span>
-                      <span className="text-[10px] text-blue-600 font-bold group-hover:underline flex items-center gap-0.5">
-                        Detail <ArrowRight className="w-3 h-3" />
-                      </span>
+                    <div className="text-left">
+                      <div className="flex items-center gap-0.5 text-amber-400">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
+                        ))}
+                      </div>
+                      <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                        Dipercaya <span className="font-bold text-slate-700">12.400+</span> pembaca aktif
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
-            </section>
+                </motion.div>
 
-            {/* QUICK CATEGORY HIGHLIGHT FILTER TRIGGER ZONE */}
-            <section className="bg-sky-50 py-12 border-y border-sky-100">
-              <div className="max-w-7xl mx-auto px-4 text-center space-y-6">
-                <h3 className="text-xl md:text-2xl font-black text-slate-900 leading-none">Cari Buku Berdasarkan Kategori Favorit</h3>
-                <p className="text-xs text-slate-500 max-w-lg mx-auto leading-relaxed">
-                  Navigasi lebih mudah! Jelajahi subjek literatur terbaik yang dipilah cermat sesuai dengan segmentasi minat bakat Anda.
-                </p>
-                <div className="flex flex-wrap gap-2.5 justify-center max-w-2xl mx-auto">
-                  {EBOOK_CATEGORIES.map(cat => (
-                    <button
-                      key={cat}
-                      onClick={() => {
-                        // Quick filter trigger simulation
-                        setActivePage('catalog');
-                      }}
-                      className="px-4 py-2 bg-white text-slate-700 hover:text-blue-600 hover:border-blue-500 border border-slate-200 shadow-2xs text-xs font-semibold rounded-2xl cursor-pointer transition-all active:scale-95"
-                    >
-                      {cat}
-                    </button>
+                {/* Right featured book visual */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.92 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.7, ease: 'easeOut', delay: 0.1 }}
+                  className="relative flex justify-center lg:justify-end"
+                >
+                  {featuredEbook && (
+                    <div className="relative w-full max-w-sm">
+                      {/* Glow card */}
+                      <div className="absolute inset-0 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-[2rem] rotate-6 scale-95 opacity-20 blur-2xl" />
+                      <div
+                        onClick={() => { setSelectedEbook(featuredEbook); setActivePage('detail'); }}
+                        className="relative bg-white/70 backdrop-blur-xl border border-white rounded-[2rem] p-5 shadow-2xl shadow-indigo-900/10 cursor-pointer hover:-translate-y-1 transition-transform duration-300"
+                      >
+                        <div className="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-lg">
+                          <img
+                            src={featuredEbook.coverUrl}
+                            alt={featuredEbook.title}
+                            referrerPolicy="no-referrer"
+                            className="w-full h-full object-cover"
+                          />
+                          <span className="absolute top-3 left-3 bg-amber-400 text-slate-900 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wide shadow">
+                            Pilihan Editor
+                          </span>
+                        </div>
+                        <div className="pt-4 space-y-1">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">{featuredEbook.category}</span>
+                          <h3 className="font-extrabold text-slate-900 leading-snug line-clamp-1">{featuredEbook.title}</h3>
+                          <div className="flex items-center justify-between pt-1">
+                            <p className="text-xs text-slate-400">Oleh {featuredEbook.author}</p>
+                            <span className="flex items-center gap-1 text-xs font-bold text-slate-700">
+                              <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" /> {featuredEbook.rating}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Floating mini badge */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.5 }}
+                        className="absolute -bottom-5 -left-5 bg-white rounded-2xl shadow-xl border border-slate-100 px-4 py-3 flex items-center gap-3"
+                      >
+                        <div className="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center">
+                          <Download className="w-4 h-4 text-emerald-600" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-black text-slate-900 leading-none">Akses Instan</p>
+                          <p className="text-[10px] text-slate-400 mt-0.5">Baca dalam hitungan detik</p>
+                        </div>
+                      </motion.div>
+                    </div>
+                  )}
+                </motion.div>
+              </div>
+
+              {/* Stats band */}
+              <div className="max-w-6xl mx-auto px-6 mt-8">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-white/70 backdrop-blur-md border border-slate-100 rounded-3xl p-6 shadow-sm">
+                  {landingStats.map((s) => (
+                    <div key={s.label} className="flex items-center gap-3 justify-center md:justify-start">
+                      <div className="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                        <s.icon className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-xl font-black text-slate-900 leading-none">{s.value}</p>
+                        <p className="text-[11px] text-slate-400 font-semibold mt-1">{s.label}</p>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
             </section>
 
-            {/* NEWS & ARTICLES SECTION */}
-            <section className="max-w-7xl mx-auto px-4">
-              <div className="text-center max-w-xl mx-auto mb-10">
-                <h3 className="text-xl md:text-2xl font-extrabold text-slate-900 tracking-tight">📰 Artikel & Literasi Terbaru</h3>
-                <p className="text-xs text-slate-500 mt-1">Kumpulan tips, ulasan kebiasaan baik membaca, serta tren teknologi pendukung literasi digital.</p>
+            {/* ===== POPULAR EBOOKS ===== */}
+            <section className="max-w-7xl mx-auto px-6">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 mb-10">
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-indigo-600">Trending</span>
+                  <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight mt-1">Ebook Terpopuler</h2>
+                  <p className="text-sm text-slate-500 mt-1.5">Judul dengan rating tertinggi yang sedang dibaca ribuan orang.</p>
+                </div>
+                <button
+                  onClick={() => setActivePage('catalog')}
+                  className="self-start sm:self-auto text-sm font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1.5 cursor-pointer group"
+                >
+                  <span>Lihat semua ({ebooks.length})</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {INITIAL_ARTICLES.map((art) => (
-                  <div 
-                    key={art.id} 
-                    className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-2xs flex flex-col justify-between cursor-pointer hover:border-slate-200 transition-all group"
-                    onClick={() => setActiveArticle(art)}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
+                {popularEbooks.map((eb, idx) => (
+                  <motion.div
+                    key={eb.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.4, delay: idx * 0.08 }}
+                    onClick={() => { setSelectedEbook(eb); setActivePage('detail'); }}
+                    className="bg-white rounded-3xl border border-slate-100 p-4 shadow-sm hover:shadow-xl hover:-translate-y-1.5 hover:border-indigo-100 transition-all duration-300 flex flex-col justify-between group cursor-pointer"
                   >
-                    <div className="space-y-4">
-                      {/* Image header */}
-                      <div className="relative aspect-video bg-slate-100 overflow-hidden">
+                    <div className="space-y-3.5">
+                      <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-slate-100">
                         <img
-                          src={art.coverUrl}
-                          alt={art.title}
+                          src={eb.coverUrl}
+                          alt={eb.title}
                           referrerPolicy="no-referrer"
-                          className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
-                        <span className="absolute top-2 left-2 bg-blue-600 text-white font-bold text-[9px] px-2 py-0.5 rounded uppercase">{art.category}</span>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <span className="absolute top-2.5 left-2.5 bg-white/90 backdrop-blur text-slate-900 px-2.5 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 shadow-sm">
+                          <Star className="w-3 h-3 text-amber-400 fill-amber-400" /> {eb.rating}
+                        </span>
                       </div>
-
-                      {/* Content summaries */}
-                      <div className="px-5 space-y-2">
-                        <span className="text-[10px] text-slate-400 font-mono block">{art.date} • {art.readTime}</span>
-                        <h4 className="font-extrabold text-slate-800 text-sm md:text-base leading-snug line-clamp-2 hover:text-blue-600 group-hover:text-blue-600 transition-colors">
-                          {art.title}
-                        </h4>
-                        <p className="text-xs text-slate-405 leading-relaxed line-clamp-3">{art.summary}</p>
+                      <div className="space-y-1">
+                        <span className="text-[10px] font-bold uppercase tracking-wide text-indigo-600">{eb.category}</span>
+                        <h3 className="font-bold text-slate-900 leading-snug line-clamp-2 text-sm">{eb.title}</h3>
+                        <p className="text-xs text-slate-400">Oleh {eb.author}</p>
                       </div>
                     </div>
 
-                    <div className="px-5 pb-5 pt-3 flex justify-between items-center text-[10px] font-bold text-blue-605 group-hover:underline block mt-4">
-                      <span>Baca Selengkapnya</span>
-                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                    <div className="mt-4 pt-3.5 border-t border-slate-100 flex justify-between items-center">
+                      <span className="font-black text-slate-900 text-sm">
+                        {eb.price === 0 ? 'GRATIS' : `Rp ${eb.price.toLocaleString('id-ID')}`}
+                      </span>
+                      <span className="w-8 h-8 rounded-full bg-slate-50 group-hover:bg-indigo-600 group-hover:text-white text-slate-400 flex items-center justify-center transition-colors">
+                        <ArrowRight className="w-4 h-4" />
+                      </span>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </section>
+
+            {/* ===== WHY US / FEATURES ===== */}
+            <section className="max-w-7xl mx-auto px-6">
+              <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950 rounded-[2.5rem] p-8 md:p-14 text-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/20 rounded-full blur-3xl" />
+                <div className="absolute bottom-0 left-0 w-72 h-72 bg-violet-500/10 rounded-full blur-3xl" />
+                <div className="relative text-center max-w-2xl mx-auto mb-12">
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-indigo-300">Mengapa PustakaEbook</span>
+                  <h2 className="text-2xl md:text-4xl font-black tracking-tight mt-2">Pengalaman membaca yang dirancang dengan elegan</h2>
+                  <p className="text-sm text-slate-400 mt-3 leading-relaxed">Semua yang Anda butuhkan untuk menikmati buku digital, tanpa kompromi.</p>
+                </div>
+                <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                  {platformFeatures.map((f) => (
+                    <div key={f.title} className="bg-white/5 backdrop-blur border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-colors">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center shadow-lg shadow-indigo-900/40 mb-4">
+                        <f.icon className="w-6 h-6 text-white" />
+                      </div>
+                      <h3 className="font-bold text-base leading-snug">{f.title}</h3>
+                      <p className="text-xs text-slate-400 leading-relaxed mt-2">{f.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            {/* ===== CATEGORIES ===== */}
+            <section className="max-w-7xl mx-auto px-6">
+              <div className="text-center max-w-xl mx-auto mb-10">
+                <span className="text-[11px] font-bold uppercase tracking-widest text-indigo-600">Telusuri</span>
+                <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight mt-1">Jelajahi Berdasarkan Kategori</h2>
+                <p className="text-sm text-slate-500 mt-1.5">Temukan genre favorit Anda dengan sekali klik.</p>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {EBOOK_CATEGORIES.filter(c => c !== 'Semua Kategori').map((cat) => {
+                  const Icon = categoryIcons[cat] || BookOpen;
+                  const count = ebooks.filter(eb => eb.category === cat).length;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => setActivePage('catalog')}
+                      className="group flex items-center gap-4 bg-white border border-slate-100 hover:border-indigo-200 rounded-2xl p-5 shadow-sm hover:shadow-lg text-left cursor-pointer transition-all"
+                    >
+                      <div className="w-12 h-12 rounded-2xl bg-indigo-50 group-hover:bg-indigo-600 text-indigo-600 group-hover:text-white flex items-center justify-center shrink-0 transition-colors">
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <div className="flex-grow">
+                        <h3 className="font-bold text-sm text-slate-900 leading-snug">{cat}</h3>
+                        <p className="text-[11px] text-slate-400 mt-0.5">{count} judul tersedia</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+
+            {/* ===== ARTICLES ===== */}
+            <section className="max-w-7xl mx-auto px-6">
+              <div className="text-center max-w-xl mx-auto mb-10">
+                <span className="text-[11px] font-bold uppercase tracking-widest text-indigo-600">Literasi</span>
+                <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight mt-1">Artikel & Wawasan Terbaru</h2>
+                <p className="text-sm text-slate-500 mt-1.5">Tips membaca, ulasan, dan tren literasi digital pilihan.</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {INITIAL_ARTICLES.map((art) => (
+                  <div
+                    key={art.id}
+                    onClick={() => setActiveArticle(art)}
+                    className="bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col cursor-pointer group"
+                  >
+                    <div className="relative aspect-video bg-slate-100 overflow-hidden">
+                      <img
+                        src={art.coverUrl}
+                        alt={art.title}
+                        referrerPolicy="no-referrer"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <span className="absolute top-3 left-3 bg-white/90 backdrop-blur text-indigo-700 font-bold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wide shadow-sm">{art.category}</span>
+                    </div>
+                    <div className="p-6 flex flex-col flex-grow">
+                      <span className="text-[10px] text-slate-400 font-semibold block">{art.date} • {art.readTime}</span>
+                      <h3 className="font-extrabold text-slate-900 text-base leading-snug line-clamp-2 mt-2 group-hover:text-indigo-600 transition-colors">{art.title}</h3>
+                      <p className="text-xs text-slate-500 leading-relaxed line-clamp-3 mt-2 flex-grow">{art.summary}</p>
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-600 mt-4">
+                        <span>Baca selengkapnya</span>
+                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             </section>
 
-            {/* USER TESTIMONIALS MODUL */}
-            <section className="max-w-5xl mx-auto px-4 py-12 bg-white rounded-3xl border border-slate-100 shadow-2xs">
-              <div className="text-center max-w-xl mx-auto mb-10">
-                <span className="text-[10px] font-bold text-blue-600 bg-blue-50 py-1 px-3 rounded-md uppercase tracking-widest block w-fit mx-auto mb-2">TESTIMONI</span>
-                <h3 className="text-xl md:text-2xl font-black text-slate-900 leading-none">Apa Kata Pembaca Setia Kami?</h3>
+            {/* ===== TESTIMONIALS ===== */}
+            <section className="max-w-7xl mx-auto px-6">
+              <div className="text-center max-w-xl mx-auto mb-12">
+                <span className="text-[11px] font-bold uppercase tracking-widest text-indigo-600">Testimoni</span>
+                <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight mt-1">Kata Pembaca Setia Kami</h2>
               </div>
-
-              {/* Testimonials list grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {INITIAL_TESTIMONIALS.map((t) => (
-                  <div key={t.id} className="p-5 bg-slate-50/75 border border-slate-100 rounded-2xl flex flex-col justify-between text-left space-y-4 relative">
-                    <span className="absolute top-4 right-4 text-3xl font-serif text-slate-300 leading-none select-none">“</span>
-                    
-                    <p className="text-xs text-slate-600 leading-relaxed italic relative z-10">
-                      "{t.feedback}"
-                    </p>
-
-                    <div className="flex items-center gap-3 border-t border-slate-100 pt-3 shrink-0">
+                  <div key={t.id} className="relative bg-white border border-slate-100 rounded-3xl p-7 shadow-sm flex flex-col gap-5">
+                    <Quote className="w-9 h-9 text-indigo-100 fill-indigo-100" />
+                    <p className="text-sm text-slate-600 leading-relaxed flex-grow">"{t.feedback}"</p>
+                    <div className="flex items-center gap-3 border-t border-slate-100 pt-4">
                       <img
                         src={t.avatar}
                         alt={t.name}
                         referrerPolicy="no-referrer"
-                        className="w-9 h-9 rounded-full object-cover border border-slate-200"
+                        className="w-11 h-11 rounded-full object-cover border-2 border-white shadow"
                       />
                       <div>
-                        <strong className="text-xs font-bold text-slate-800 block">{t.name}</strong>
-                        <span className="text-[10px] text-slate-400 font-medium block">{t.role}</span>
+                        <strong className="text-sm font-bold text-slate-900 block">{t.name}</strong>
+                        <span className="text-[11px] text-slate-400 font-medium block">{t.role}</span>
                       </div>
                     </div>
                   </div>
                 ))}
+              </div>
+            </section>
+
+            {/* ===== FINAL CTA ===== */}
+            <section className="max-w-7xl mx-auto px-6">
+              <div className="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-700 rounded-[2.5rem] p-10 md:p-16 text-center text-white shadow-2xl shadow-indigo-500/20">
+                <div className="absolute -top-16 -right-10 w-72 h-72 bg-white/10 rounded-full blur-2xl" />
+                <div className="absolute -bottom-20 -left-10 w-72 h-72 bg-black/10 rounded-full blur-2xl" />
+                <div className="relative max-w-2xl mx-auto space-y-6">
+                  <h2 className="text-3xl md:text-4xl font-black tracking-tight leading-tight">Mulai perjalanan membaca Anda hari ini</h2>
+                  <p className="text-sm md:text-base text-indigo-100 leading-relaxed">Bergabunglah dengan ribuan pembaca dan bangun koleksi ebook digital pribadi Anda sekarang.</p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                    <button
+                      onClick={() => setActivePage('catalog')}
+                      className="px-8 py-3.5 bg-white text-indigo-700 hover:bg-indigo-50 rounded-2xl text-sm font-black shadow-lg cursor-pointer flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                    >
+                      <span>Mulai Jelajahi</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                    {!currentUser && (
+                      <button
+                        onClick={() => setShowAuthModal(true)}
+                        className="px-8 py-3.5 bg-white/10 hover:bg-white/20 text-white border border-white/30 rounded-2xl text-sm font-bold cursor-pointer transition-all"
+                      >
+                        Buat Akun Gratis
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
             </section>
           </div>
         )}
 
         {/* TAB 2: CATALOG SCREEN */}
+
         {activePage === 'catalog' && (
           <Catalog
             ebooks={ebooks}
@@ -826,9 +1007,68 @@ export default function App() {
       </div>
 
       {/* FOOTER GENERAL INFO */}
-      <footer className="max-w-7xl mx-auto px-4 pt-16 mt-8 border-t border-slate-205 text-center text-xs text-slate-455">
-        <p className="font-semibold text-slate-650">Sistem Website Ebook Online © 2026</p>
-        <p className="mt-1">Dibuat dengan dedikasi kepatuhan penuh atas spesifikasi 10 Modul Interaktif bagi Ebook online premium.</p>
+      <footer className="mt-12 bg-slate-900 text-slate-300">
+        <div className="max-w-7xl mx-auto px-6 py-14 grid grid-cols-2 md:grid-cols-5 gap-8">
+          {/* Brand column */}
+          <div className="col-span-2 space-y-4">
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 bg-gradient-to-tr from-indigo-500 to-violet-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-900/30">
+                <BookOpen className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-black text-white leading-none tracking-tight">PustakaEbook</h3>
+                <span className="text-[10px] text-slate-500 font-bold block tracking-widest mt-0.5">ONLINE PORTAL</span>
+              </div>
+            </div>
+            <p className="text-xs text-slate-400 leading-relaxed max-w-xs">
+              Perpustakaan digital premium untuk membaca, mengoleksi, dan menikmati ribuan ebook pilihan kapan saja, di mana saja.
+            </p>
+            <div className="flex items-center gap-3 pt-1">
+              {[Instagram, Twitter, Facebook, Youtube].map((Icon, i) => (
+                <a key={i} href="#" onClick={(e) => e.preventDefault()} className="w-9 h-9 rounded-xl bg-white/5 hover:bg-indigo-600 flex items-center justify-center transition-colors cursor-pointer">
+                  <Icon className="w-4 h-4 text-slate-300" />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Links: Jelajahi */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-black text-white uppercase tracking-widest">Jelajahi</h4>
+            <ul className="space-y-2 text-xs text-slate-400">
+              <li><button onClick={() => { setActivePage('home'); setSelectedEbook(null); }} className="hover:text-white transition-colors cursor-pointer">Beranda</button></li>
+              <li><button onClick={() => { setActivePage('catalog'); setSelectedEbook(null); }} className="hover:text-white transition-colors cursor-pointer">Katalog</button></li>
+              <li><button onClick={() => { setActivePage('my-ebooks'); setSelectedEbook(null); }} className="hover:text-white transition-colors cursor-pointer">Ebook Saya</button></li>
+              <li><button onClick={() => { setActivePage('presentation'); setSelectedEbook(null); }} className="hover:text-white transition-colors cursor-pointer">Keunggulan</button></li>
+            </ul>
+          </div>
+
+          {/* Links: Kategori */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-black text-white uppercase tracking-widest">Kategori</h4>
+            <ul className="space-y-2 text-xs text-slate-400">
+              {EBOOK_CATEGORIES.filter(c => c !== 'Semua Kategori').slice(0, 4).map(cat => (
+                <li key={cat}><button onClick={() => setActivePage('catalog')} className="hover:text-white transition-colors cursor-pointer text-left">{cat}</button></li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Newsletter */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-black text-white uppercase tracking-widest">Kontak</h4>
+            <p className="text-xs text-slate-400 leading-relaxed">Punya pertanyaan? Hubungi tim kami.</p>
+            <a href="mailto:halo@pustakaebook.id" onClick={(e) => e.preventDefault()} className="inline-flex items-center gap-2 text-xs font-semibold text-indigo-300 hover:text-indigo-200 cursor-pointer">
+              <Mail className="w-4 h-4" /> halo@pustakaebook.id
+            </a>
+          </div>
+        </div>
+
+        <div className="border-t border-white/10">
+          <div className="max-w-7xl mx-auto px-6 py-5 flex flex-col sm:flex-row justify-between items-center gap-2 text-[11px] text-slate-500">
+            <p>Sistem Website Ebook Online © 2026. Hak cipta dilindungi.</p>
+            <p className="flex items-center gap-1.5">Dibuat dengan <Heart className="w-3 h-3 text-rose-500 fill-rose-500" /> untuk para pembaca.</p>
+          </div>
+        </div>
       </footer>
 
       {/* FULL-SCREEN ACTIVE READER OVERLAY DETECTOR */}
