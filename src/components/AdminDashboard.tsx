@@ -10,7 +10,7 @@ interface AdminDashboardProps {
   ebooks: Ebook[];
   users: User[];
   transactions: Transaction[];
-  onAddEbook: (ebook: Ebook) => void;
+  onAddEbook: (ebook: Ebook) => void; 
   onEditEbook: (ebook: Ebook) => void;
   onDeleteEbook: (id: string) => void;
   onUpdateUserRole: (userId: string, targetRole: 'user' | 'admin') => void;
