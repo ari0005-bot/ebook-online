@@ -153,7 +153,7 @@ export default function Profile({
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         
         {/* Left Vertical Navigation Menu */}
-        <div className="lg:col-span-1 border border-slate-100 bg-white rounded-3xl p-5 shadow-2xs h-fit space-y-1">
+        <div className="lg:col-span-1 glass-panel rounded-3xl p-5 h-fit space-y-1 shadow-lift">
           <button
             onClick={() => setActiveTab('edit')}
             className={`w-full py-2.5 px-4 text-xs font-bold rounded-xl flex items-center gap-2.5 transition-all text-left cursor-pointer ${activeTab === 'edit' ? 'bg-blue-600 text-white shadow-xs' : 'text-slate-500 hover:bg-slate-50'}`}
@@ -175,7 +175,7 @@ export default function Profile({
         </div>
 
         {/* Right Active Subsection forms rendering */}
-        <div className="lg:col-span-3 bg-white border border-slate-100 rounded-3xl p-6 md:p-8 shadow-2xs">
+        <div className="lg:col-span-3 glass-panel rounded-3xl p-6 md:p-8 shadow-lift">
           
           {/* TAB 1: PROFILE EDIT FORM */}
           {activeTab === 'edit' && (
@@ -227,7 +227,7 @@ export default function Profile({
               <div className="flex justify-end pt-4">
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2.5 button-primary rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer"
                 >
                   <Save className="w-4 h-4" /> Simpan Perubahan Profil
                 </button>
@@ -278,7 +278,7 @@ export default function Profile({
               <div className="flex justify-end pt-4">
                 <button
                   type="submit"
-                  className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2.5 button-primary rounded-xl text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer"
                 >
                   <KeyRound className="w-4 h-4" /> Perbaharui Kata Sandi
                 </button>

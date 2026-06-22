@@ -141,12 +141,12 @@ export default function CartCheckout({
             <h3 className="text-xl font-bold text-slate-800 mb-2">Item Belanja ({cartItems.length})</h3>
             
             {cartItems.length === 0 ? (
-              <div className="p-8 bg-white border border-slate-100 rounded-3xl text-center space-y-4 shadow-2xs">
-                <ShoppingBag className="w-12 h-12 text-slate-300 mx-auto" />
+              <div className="p-8 glass-panel rounded-3xl text-center space-y-4 shadow-lift">
+                <ShoppingBag className="w-12 h-12 text-slate-400 mx-auto" />
                 <p className="text-slate-500 text-sm">Keranjang belanja Anda dalam keadaan kosong.</p>
                 <button
                   onClick={onBackToCatalog}
-                  className="px-5 py-2.5 bg-blue-600 text-white font-bold rounded-xl text-xs hover:bg-blue-700 cursor-pointer"
+                  className="px-5 py-2.5 button-primary text-xs font-bold rounded-xl"
                 >
                   Jelajahi Ebook Sekarang
                 </button>
@@ -185,7 +185,7 @@ export default function CartCheckout({
 
           {/* Pricing detailed summary block */}
           <div className="lg:col-span-1">
-            <div className="bg-white border border-slate-150 p-6 rounded-3xl shadow-xs space-y-4 sticky top-6">
+            <div className="glass-panel p-6 rounded-3xl space-y-4 sticky top-6">
               <h4 className="text-sm font-bold uppercase tracking-wider text-slate-400">Ringkasan Pesanan</h4>
               
               <div className="space-y-2 border-b border-slate-100 pb-4 text-xs text-slate-600">
@@ -226,7 +226,7 @@ export default function CartCheckout({
               <button
                 onClick={() => setStep('payment')}
                 disabled={cartItems.length === 0}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-150 disabled:text-slate-400 text-white text-xs font-bold rounded-xl transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-3 button-primary disabled:opacity-50 disabled:cursor-not-allowed text-xs font-bold rounded-xl flex items-center justify-center gap-2"
               >
                 <span>Lanjut ke Pembayaran</span>
                 <ChevronRight className="w-4 h-4" />

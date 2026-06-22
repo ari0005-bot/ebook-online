@@ -21,7 +21,7 @@ export const INITIAL_EBOOKS: Ebook[] = [
     isPopular: true,
     isNew: false,
     dateAdded: '2026-01-10',
-    coverUrl: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=400',
+    coverUrl: 'https://picsum.photos/seed/ebook1/400/600',
     description: 'Buku panduan praktis filsafat Yunani-Romawi Kuno (Stoikisme) untuk membantu kita mengatasi kekhawatiran dan mengendalikan emosi negatif dalam kehidupan sehari-hari. Sangat cocok bagi generasi muda menghadapi kecemasan modern, quarter-life crisis, dan tuntutan dunia yang cepat.',
     pages: [
       "BAB 1: KECEMASAN MODERN DAN SOLUSI KUNO\n\nSelamat datang di lembaran Filosofi Teras. Apakah Anda sering merasa stres di jalan raya karena macet? Khawatir akan masa depan karir Anda? Atau merasa tersinggung dengan komentar orang lain di media sosial?\n\nSemua kekhawatiran ini adalah bagian dari kehidupan modern. Menariknya, lebih dari 2.000 tahun yang lalu, di Yunani Kuno, sekelompok filsuf berkumpul di 'Stoa' (teras beratap) untuk membahas persoalan yang sama. Mereka menemukan sebuah cara pandang hidup yang disebut Stoikisme.\n\nStoikisme bukan pemikiran yang rumit atau teoretis abstrak. Ini adalah filosofi praktis yang dirancang untuk hidup tenang, tabah, bebas dari emosi negatif, dan tangguh di tengah rintangan.",
@@ -41,7 +41,7 @@ export const INITIAL_EBOOKS: Ebook[] = [
     isPopular: true,
     isNew: true,
     dateAdded: '2026-05-20',
-    coverUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80&w=400',
+    coverUrl: 'https://picsum.photos/seed/ebook2/400/600',
     description: 'Panduan terlengkap membangun aplikasi web modern berskala besar menggunakan React 19, Vite, Tailwind CSS, dan Next.js App Router. Dilengkapi dengan studi kasus nyata, pembuatan REST API, optimasi SEO, serta deployment ke cloud platform.',
     pages: [
       "BAB 1: PENGANTAR REACT MODERN\n\nSelamat datang di era React Modern! React adalah pustaka JavaScript yang sangat populer untuk membangun antarmuka pengguna (UI) yang interaktif, cepat, dan modular.\n\nPada versi terbaru React 19, kita disuguhkan berbagai fitur luar biasa seperti Compiler otomatis, Actions untuk penanganan form state, server components, serta integrasi aset yang lebih ciamik.\n\nDalam buku ini, kita akan memulai perjalanan dari dasar: memahami konsep Component, Props, State, dan siklus hidup re-rendering sebelum melangkah ke framework tingkat lanjut.",
@@ -61,7 +61,7 @@ export const INITIAL_EBOOKS: Ebook[] = [
     isPopular: false,
     isNew: false,
     dateAdded: '2025-11-05',
-    coverUrl: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=400',
+    coverUrl: 'https://picsum.photos/seed/ebook3/400/600',
     description: 'Kisah legendaris sepuluh anak Belitong yang berjuang mengejar mimpi dan pendidikan di sebuah sekolah reot SD Muhammadiyah Belitong. Buku penuh haru, persahabatan erat, cinta monyet, tekad baja, dan rasa humor yang tinggi di tengah kemiskinan daerah tambang timah.',
     pages: [
       "BAGIAN 1: SEKOLAH YANG HAMPIR ROBOH\n\nPagi itu, matahari bersinar agak pucat di atas pulau Belitong. Di halaman SD Muhammadiyah, sepuluh pasang mata cemas menatap jalan setapak berpasir merah. \n\nPak Harfan dan Bu Mus berdiri di depan pintu kelas yang miring. Aturan pemerintah sangat kejam: jika murid baru tidak mencapai sepuluh orang, sekolah paling miskin di Belitong ini harus ditutup selamanya.\n\nSembilan anak telah duduk gemetar di bangku kayu lapuk. Harapan hampir padam ketika waktu menunjukkan pukul sepuluh siang. Namun tiba-tiba, muncul sesosok anak berambut ikal bersama ibunya dari kejauhan. Lintang! Dialah penyelamat sekolah reot kami.",
@@ -81,7 +81,7 @@ export const INITIAL_EBOOKS: Ebook[] = [
     isPopular: false,
     isNew: true,
     dateAdded: '2026-03-15',
-    coverUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=400',
+    coverUrl: 'https://picsum.photos/seed/ebook4/400/600',
     description: 'Buku komprehensif bagi wirausahawan, manajer, dan mahasiswa bisnis untuk memahami peta ekosistem e-commerce, transformasi digital perusahaan tradisional, pemasaran digital (SEO, SEM & Social Media Campaign), serta metrik keberhasilan startup.',
     pages: [
       "BAB 1: ERA DISRUPSI DIGITAL\n\nSelamat datang di panduan Bisnis Digital 101. Dunia bisnis hari ini bergerak lebih cepat daripada sebelumnya. Transformasi digital bukan lagi sekadar opsi sekunder bagi perusahaan, melainkan keharusan mutlak untuk bertahan hidup (survival).\n\nKita melihat raksasa ritel tradisional runtuh karena lambat mengadopsi e-commerce, sementara startup lokal kecil yang fleksibel berkembang pesat memanfaatkan media sosial dan aplikasi pengiriman instan. \n\nMari kita telaah apa saja fondasi utama bisnis digital di era disrupsi.",
@@ -100,7 +100,7 @@ export const INITIAL_EBOOKS: Ebook[] = [
     isPopular: true,
     isNew: false,
     dateAdded: '2025-08-12',
-    coverUrl: 'https://images.unsplash.com/photo-1507668077129-56e32842fceb?auto=format&fit=crop&q=80&w=400',
+    coverUrl: 'https://picsum.photos/seed/ebook5/400/600',
     description: 'Eksplorasi konsep fisika modern yang ramah dibaca semua kalangan. Mengungkap misteri partikel sub-atomik, superposition, kuantum keterikatan (entanglement), teori relativitas Einstein, hingga potensi teknologi komputer kuantum masa depan.',
     pages: [
       "BAB 1: DUNIA SANGAT KECIL YANG ANEH\n\nKetika kita melihat buah apel jatuh dari pohonnya, hukum fisika klasik Isaac Newton bekerja dengan sangat teoretis dan mudah diprediksi. \n\nNamun, jika kita menyelam masuk ke dunia sub-atomik—dunia elektron, proton, dan foton cahaya—seluruh hukum klasik tersebut runtuh berantakan secara dramatis.\n\nSelamat datang di Fisika Quantum! Di sinilah partikel bisa berada di dua tempat berbeda sekaligus, menembus dinding penghalang yang kokoh bagai hantu, dan berkomunikasi seketika melompati jarak jutaan tahun cahaya.",
@@ -118,7 +118,7 @@ export const INITIAL_EBOOKS: Ebook[] = [
     isPopular: true,
     isNew: false,
     dateAdded: '2025-10-30',
-    coverUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=400',
+    coverUrl: 'https://picsum.photos/seed/ebook6/400/600',
     description: 'Sebuah epos berdarah industri tembakau cengkeh nusantara, melintasi masa penjajahan Jepang, kemerdekaan hingga era modern. Berbalut aroma gurih saus kretek rahasia, persaingan bisnis keluarga yang sengit, intrik pengkhianatan politik, dan cinta sejati yang tak sampai antara Jeng Yah dan Soeraja.',
     pages: [
       "BAGIAN 1: PERMINTAAN TERAKHIR RAMASOERAJA\n\nBau obat antiseptik memenuhi kamar rumah sakit yang temaram. Romo Soeraja menjelang ajal, tubuhnya kurus dan bicaranya mengigau tidak jelas. \n\nNamun di sela batuk darahnya yang tersengal, ia terus menerus membisikkan satu nama yang asing bagi seluruh keturunannya: 'Jeng Yah... Jeng Yah...'\n\nKetiga putranya, Tegar, Karim, dan Lebas, saling berpandangan heran. Siapakah perempuan bernama Jeng Yah ini? Mengapa bukan nama ibu mereka, Purwanti, yang disebutnya di ujung napas? Demi memenuhi kerinduan terakhir sang ayah, Lebas memutuskan menjelajahi kota-kota pedalaman Jawa Tengah guna menelusuri legenda masa lalu industrial kretek keluarga.",

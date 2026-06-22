@@ -16,7 +16,7 @@ function BenefitCard({ icon, title, description, idx }: BenefitCardProps) {
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: idx * 0.1, duration: 0.4 }}
-      className="p-6 bg-white rounded-2xl border border-slate-100 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col items-start text-left group"
+      className="p-6 glass-panel rounded-[1.75rem] hover:-translate-y-1 transition-all duration-300 flex flex-col items-start text-left group"
     >
       <div className="p-3 bg-blue-50 text-blue-600 rounded-xl mb-4 group-hover:scale-110 transition-transform duration-300">
         {icon}
