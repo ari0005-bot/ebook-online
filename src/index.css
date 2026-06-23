@@ -252,3 +252,12 @@ body {
   box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.08);
 }
 
+/* Penulisan Utilitas 3D Gaya Baru di Tailwind v4.0 */
+@utility perspective-1000 {
+  perspective: 1000px;
+}
+
+@utility backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
