@@ -68,7 +68,6 @@ export default function App() {
     setTimeout(() => setToastMessage(''), 3000);
   };
 
-<<<<<<< HEAD
   const readStoredJSON = <T,>(key: string, fallback: T): T => {
     if (typeof window === 'undefined') return fallback;
 
@@ -82,9 +81,6 @@ export default function App() {
   };
 
   // INITAL DATA BOOTSTRAPPING FLOW
-=======
-  // INITIAL DATA BOOTSTRAPPING FLOW
->>>>>>> fd002bc40fc8994f69b1d5299407d1e55fb2cfa5
   useEffect(() => {
     // 1. Fetch Ebooks
     const savedBooks = readStoredJSON<Ebook[]>('app_ebooks', INITIAL_EBOOKS);
@@ -130,20 +126,15 @@ export default function App() {
 
     // 5. Fetch Active User login token
     const storedUser = readStoredJSON<User | null>('current_user', null);
-    if (storedUser) {
-<<<<<<< HEAD
-      setCurrentUser(storedUser);
-=======
-      try { 
-        const parsedUser = JSON.parse(storedUser);
-        setCurrentUser(parsedUser);
-        // Menjaga halaman tetap sinkron dengan role setelah refresh
-        if (parsedUser.role === 'admin') {
-          setActivePage('admin');
-        }
-      } catch (e) {}
->>>>>>> fd002bc40fc8994f69b1d5299407d1e55fb2cfa5
-    }
+    
+   if (storedUser) {
+  try {
+    const parsedUser = JSON.parse(storedUser);
+    setCurrentUser(parsedUser);
+  } catch (error) {
+    console.error(error);
+  }
+}
 
     // ===== TAMBAHAN SPLASH SCREEN TIMEOUT =====
     // Splash screen akan menutup setelah 2.5 detik ketika bootstrapping data selesai
@@ -174,14 +165,10 @@ export default function App() {
     localStorage.setItem('app_reviews', JSON.stringify(newList));
   };
 
-<<<<<<< HEAD
   // Fetch cart details & items owned by logged-in user
   const ownedBookIds = currentUser
     ? readStoredJSON<string[]>(`owned_ebooks_${currentUser.id}`, ['eb-5'])
     : ['eb-5'];
-=======
-  const ownedBookIds = currentUser ? JSON.parse(localStorage.getItem(`owned_ebooks_${currentUser.id}`) || '["eb-5"]') : ['eb-5'];
->>>>>>> fd002bc40fc8994f69b1d5299407d1e55fb2cfa5
 
   const handleLogout = () => {
     localStorage.removeItem('current_user');
@@ -241,12 +228,8 @@ export default function App() {
   const handleCheckoutSuccess = (purchasedIds: string[], txRecord: Transaction, newBalance: number) => {
     if (!currentUser) return;
 
-<<<<<<< HEAD
     // 1. Deliver the books into client library
     const oldLibrary = readStoredJSON<string[]>(`owned_ebooks_${currentUser.id}`, ['eb-5']);
-=======
-    const oldLibrary: string[] = JSON.parse(localStorage.getItem(`owned_ebooks_${currentUser.id}`) || `["eb-5"]`);
->>>>>>> fd002bc40fc8994f69b1d5299407d1e55fb2cfa5
     const newLibrary = Array.from(new Set([...oldLibrary, ...purchasedIds]));
     localStorage.setItem(`owned_ebooks_${currentUser.id}`, JSON.stringify(newLibrary));
 
