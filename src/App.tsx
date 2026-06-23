@@ -68,16 +68,28 @@ export default function App() {
     setTimeout(() => setToastMessage(''), 3000);
   };
 
+<<<<<<< HEAD
+  const readStoredJSON = <T,>(key: string, fallback: T): T => {
+    if (typeof window === 'undefined') return fallback;
+
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return fallback;
+      return JSON.parse(raw) as T;
+    } catch {
+      return fallback;
+    }
+  };
+
+  // INITAL DATA BOOTSTRAPPING FLOW
+=======
   // INITIAL DATA BOOTSTRAPPING FLOW
+>>>>>>> fd002bc40fc8994f69b1d5299407d1e55fb2cfa5
   useEffect(() => {
     // 1. Fetch Ebooks
-    const savedBooks = localStorage.getItem('app_ebooks');
-    if (savedBooks) {
-      try { setEbooks(JSON.parse(savedBooks)); } catch(e) { setEbooks(INITIAL_EBOOKS); }
-    } else {
-      setEbooks(INITIAL_EBOOKS);
-      localStorage.setItem('app_ebooks', JSON.stringify(INITIAL_EBOOKS));
-    }
+    const savedBooks = readStoredJSON<Ebook[]>('app_ebooks', INITIAL_EBOOKS);
+    setEbooks(savedBooks);
+    localStorage.setItem('app_ebooks', JSON.stringify(savedBooks));
 
     // 2. Fetch Users Directory
     const defaultUsersList: User[] = [
@@ -102,32 +114,26 @@ export default function App() {
         balance: 250000
       }
     ];
-    const savedUsers = localStorage.getItem('app_users');
-    if (savedUsers) {
-      try { setUsers(JSON.parse(savedUsers)); } catch(e) { setUsers(defaultUsersList); }
-    } else {
-      setUsers(defaultUsersList);
-      localStorage.setItem('app_users', JSON.stringify(defaultUsersList));
-    }
+    const savedUsers = readStoredJSON<User[]>('app_users', defaultUsersList);
+    setUsers(savedUsers);
+    localStorage.setItem('app_users', JSON.stringify(savedUsers));
 
     // 3. Fetch Reviews
-    const savedReviews = localStorage.getItem('app_reviews');
-    if (savedReviews) {
-      try { setReviews(JSON.parse(savedReviews)); } catch(e) { setReviews(INITIAL_REVIEWS); }
-    } else {
-      setReviews(INITIAL_REVIEWS);
-      localStorage.setItem('app_reviews', JSON.stringify(INITIAL_REVIEWS));
-    }
+    const savedReviews = readStoredJSON<Review[]>('app_reviews', INITIAL_REVIEWS);
+    setReviews(savedReviews);
+    localStorage.setItem('app_reviews', JSON.stringify(savedReviews));
 
     // 4. Fetch Transactions Jurnal
-    const savedTx = localStorage.getItem('app_transactions');
-    if (savedTx) {
-      try { setTransactions(JSON.parse(savedTx)); } catch(e) { setTransactions([]); }
-    }
+    const savedTx = readStoredJSON<Transaction[]>('app_transactions', []);
+    setTransactions(savedTx);
+    localStorage.setItem('app_transactions', JSON.stringify(savedTx));
 
     // 5. Fetch Active User login token
-    const storedUser = localStorage.getItem('current_user');
+    const storedUser = readStoredJSON<User | null>('current_user', null);
     if (storedUser) {
+<<<<<<< HEAD
+      setCurrentUser(storedUser);
+=======
       try { 
         const parsedUser = JSON.parse(storedUser);
         setCurrentUser(parsedUser);
@@ -136,6 +142,7 @@ export default function App() {
           setActivePage('admin');
         }
       } catch (e) {}
+>>>>>>> fd002bc40fc8994f69b1d5299407d1e55fb2cfa5
     }
 
     // ===== TAMBAHAN SPLASH SCREEN TIMEOUT =====
@@ -167,7 +174,14 @@ export default function App() {
     localStorage.setItem('app_reviews', JSON.stringify(newList));
   };
 
+<<<<<<< HEAD
+  // Fetch cart details & items owned by logged-in user
+  const ownedBookIds = currentUser
+    ? readStoredJSON<string[]>(`owned_ebooks_${currentUser.id}`, ['eb-5'])
+    : ['eb-5'];
+=======
   const ownedBookIds = currentUser ? JSON.parse(localStorage.getItem(`owned_ebooks_${currentUser.id}`) || '["eb-5"]') : ['eb-5'];
+>>>>>>> fd002bc40fc8994f69b1d5299407d1e55fb2cfa5
 
   const handleLogout = () => {
     localStorage.removeItem('current_user');
@@ -227,7 +241,12 @@ export default function App() {
   const handleCheckoutSuccess = (purchasedIds: string[], txRecord: Transaction, newBalance: number) => {
     if (!currentUser) return;
 
+<<<<<<< HEAD
+    // 1. Deliver the books into client library
+    const oldLibrary = readStoredJSON<string[]>(`owned_ebooks_${currentUser.id}`, ['eb-5']);
+=======
     const oldLibrary: string[] = JSON.parse(localStorage.getItem(`owned_ebooks_${currentUser.id}`) || `["eb-5"]`);
+>>>>>>> fd002bc40fc8994f69b1d5299407d1e55fb2cfa5
     const newLibrary = Array.from(new Set([...oldLibrary, ...purchasedIds]));
     localStorage.setItem(`owned_ebooks_${currentUser.id}`, JSON.stringify(newLibrary));
 
