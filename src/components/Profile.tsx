@@ -13,7 +13,7 @@ interface ProfileProps {
 export default function Profile({
   currentUser,
   transactions,
-  allEbooks,
+  allEbooks,     
   onUpdateUser,
   onTopUp
 }: ProfileProps) {

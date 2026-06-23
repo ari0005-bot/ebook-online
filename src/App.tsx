@@ -484,7 +484,7 @@ export default function App() {
                 className={`px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 ${activePage === 'presentation' ? 'bg-pink-100 text-pink-700 font-bold' : 'text-slate-600 hover:text-pink-600 hover:bg-slate-100'}`}
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Keunggulan</span>
+                <span>FAQ</span>
               </button>
             )}
           </nav>

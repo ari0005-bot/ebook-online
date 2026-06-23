@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Star, Search, ArrowRight, Check, ShieldCheck, Zap, Crown, Sparkles, HelpCircle } from 'lucide-react';
-import { motion } from 'motion/react'; // Pastikan di-install atau ubah ke framer-motion jika diperlukan
+import { motion } from 'motion/react'; // Mengikuti import bawaan kode kamu
 import { Ebook, Article } from '../types';
 import { INITIAL_ARTICLES } from "../data";
 
@@ -23,7 +23,6 @@ interface PricingCardProps {
   idx: number;
 }
 
-// Sub-komponen untuk Kartu Paket Berlangganan
 function PricingCard({ title, price, description, features, isPopular, icon, idx }: PricingCardProps) {
   return (
     <motion.div
@@ -149,7 +148,8 @@ export default function LandingPage({ ebooks, popularEbooks, setActivePage, setS
     }
   };
 
-  const heroBooks = ebooks.slice(0, 2);
+  // Kita ambil 5 buku pertama dari data props untuk dipajang di rak 3D Hero
+  const shelfBooks = ebooks.slice(0, 5); 
   const featuredBooks = ebooks.slice(0, 3);
   const shopfrontBooks = ebooks.slice(0, 12);
   const romanceGridBooks = ebooks.slice(0, 6);
@@ -187,37 +187,46 @@ export default function LandingPage({ ebooks, popularEbooks, setActivePage, setS
         </div>
       </div>
 
-      {/* Hero Section */}
+      {/* Hero Section dengan Rak Buku 3D ala Malaka Books */}
       <section className="max-w-7xl mx-auto px-6 pt-4">
-        <div className="hero-card relative overflow-hidden p-8 md:p-12 shadow-lift">
-          <div className="grid md:grid-cols-[1.2fr_1fr] gap-12 items-center">
+        {/* Mengubah background hero card menjadi Slate 950 (Super Dark) */}
+        <div className="bg-slate-950 text-white rounded-[2.5rem] relative overflow-hidden p-8 md:p-12 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.7)] border border-slate-900">
+          
+          {/* Ambient Glow Efek Cahaya di Background */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-1/4 w-72 h-72 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
-            {/* Hero Left */}
+          <div className="grid lg:grid-cols-[1fr_1.1fr] gap-12 items-center relative z-10">
+
+            {/* Hero Left Content */}
             <div className="space-y-6">
-              <h2 className="text-4xl md:text-5xl font-extrabold leading-tight font-serif tracking-tight glow-text">
-                Ruang Nyaman<br />Cari Bacaan Favoritmu
+              <h2 className="text-4xl md:text-5xl font-extrabold leading-tight font-serif tracking-tight text-white">
+                Ruang Nyaman<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-200 to-white">
+                  Cari Bacaan Favoritmu
+                </span>
               </h2>
-              <p className="text-sm text-slate-500 font-medium tracking-wide">
+              <p className="text-sm text-slate-400 font-medium tracking-wide leading-relaxed max-w-lg">
                 Transformasi Bisnis, Tim, dan Diri Anda dengan Modul Inovasi yang Dirancang untuk Menciptakan Impact!
               </p>
 
               <form onSubmit={handleSearchSubmit} className="relative max-w-md mt-6">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 w-5 h-5" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search books, authors or topics"
-                  className="w-full pl-12 pr-10 py-3.5 button-secondary rounded-2xl outline-none text-sm shadow-xs focus:ring-2 focus:ring-primary-500/20"
+                  className="w-full pl-12 pr-10 py-3.5 bg-slate-900/80 border border-slate-800 text-white rounded-2xl outline-none text-sm shadow-inner placeholder-slate-500 focus:ring-2 focus:ring-blue-500/40 focus:border-blue-400 transition-all"
                 />
-                <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary-600 cursor-pointer">
+                <button type="submit" className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-400 cursor-pointer transition-colors">
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </form>
 
-              <div className="pt-6 flex flex-col gap-1.5 border-t border-slate-200 w-fit">
-                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
-                  <Star className="w-4 h-4 fill-emerald-600 text-emerald-600" />
+              <div className="pt-6 flex flex-col gap-1.5 border-t border-slate-900 w-fit">
+                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
+                  <Star className="w-4 h-4 fill-emerald-500 text-emerald-500" />
                   <span>Trustpilot</span>
                 </div>
                 <div className="flex gap-0.5">
@@ -225,37 +234,69 @@ export default function LandingPage({ ebooks, popularEbooks, setActivePage, setS
                     <div key={s} className="w-5 h-5 bg-[#00b67a] flex items-center justify-center text-white text-[11px] font-bold rounded-[3px]">★</div>
                   ))}
                 </div>
-                <span className="text-[10px] text-slate-400 font-medium">TrustScore 4.8 | 37,894 reviews on</span>
+                <span className="text-[10px] text-slate-500 font-medium">TrustScore 4.8 | 37,894 reviews on</span>
               </div>
             </div>
 
-            {/* Hero Right: Bookshelf */}
-            <div className="relative flex flex-col justify-end items-center h-[260px] md:h-[300px] w-full">
-              <div className="flex items-end gap-6 z-10 mb-[16px]">
-                {heroBooks.map((book, idx) => (
+            {/* Hero Right: NEW 3D Bookshelf System */}
+            <div className="w-full flex flex-col justify-end items-center pt-8 overflow-visible">
+              
+              {/* Barisan Jajaran Buku 3D */}
+              <div 
+                className="w-full flex justify-center items-end gap-2 sm:gap-3.5 md:gap-4 pb-1 relative z-10"
+                style={{ perspective: '1200px' }}
+              >
+                {shelfBooks.map((book, idx) => (
                   <div
                     key={book.id ?? idx}
                     onClick={() => handleBookClick(book)}
-                    className="w-[105px] md:w-[135px] relative group cursor-pointer transition-all duration-500 hover:-translate-y-3"
+                    className="group relative transition-all duration-300 ease-out cursor-pointer origin-bottom"
+                    style={{
+                      transform: 'rotateX(14deg) rotateY(-12deg)',
+                      transformStyle: 'preserve-3d'
+                    }}
                   >
-                    <div className="absolute inset-x-2 -bottom-2 h-4 bg-black/30 blur-md rounded-full opacity-60 group-hover:opacity-100 transition-opacity" />
-                    <img
-                      src={book.coverUrl}
-                      alt={book.title}
-                      className="rounded-r-[4px] rounded-l-[1px] object-cover shadow-md border-l border-black/10 w-full"
-                    />
+                    {/* Bayangan Hover Efek Melayang */}
+                    <div className="absolute inset-x-1 bottom-0 h-4 bg-black/80 blur-md rounded-full opacity-70 group-hover:opacity-40 group-hover:scale-90 transition-all duration-300 translate-y-1" />
+                    
+                    {/* Wadah Gambar Cover */}
+                    <div className="w-[65px] sm:w-[90px] md:w-[115px] aspect-[3/4] rounded-r-md overflow-hidden shadow-[4px_4px_12px_rgba(0,0,0,0.9),-3px_0_6px_rgba(255,255,255,0.15)_inset] border-l border-black/40 relative group-hover:-translate-y-4 group-hover:rotate-y-[5deg] transition-all duration-300">
+                      <img
+                        src={book.coverUrl}
+                        alt={book.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      {/* Kilauan Lapisan Plastik Cover Buku */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/10 via-transparent to-black/20 pointer-events-none" />
+                    </div>
                   </div>
                 ))}
               </div>
-              <div className="w-full">
-                <div className="book-shelf" />
+
+              {/* Papan Rak Buku 3D Kayu/Minimalis Terang */}
+              <div 
+                className="w-full h-7 relative z-0 mt-[-3px]"
+                style={{ perspective: '1200px' }}
+              >
+                {/* Permukaan Atas Tempat Buku Berdiri */}
+                <div 
+                  className="absolute inset-0 bg-gradient-to-r from-slate-300 via-white to-slate-300 border-b border-slate-400 shadow-[0_15px_25px_rgba(0,0,0,0.8)]"
+                  style={{ 
+                    transform: 'rotateX(60deg)', 
+                    transformOrigin: 'top center' 
+                  }}
+                />
+                {/* Sisi Ketebalan Depan Rak */}
+                <div className="absolute top-[4px] left-0 right-0 h-[14px] bg-slate-200 border-t border-white/40 shadow-[inset_0_1px_1px_rgba(255,255,255,0.6)] rounded-b-xs" />
               </div>
+
             </div>
 
           </div>
         </div>
       </section>
 
+      {/* Row komponen sisanya ke bawah tetap aman dan sesuai dengan kode awal kamu */}
       {/* Featured Row */}
       <section className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
