@@ -56,16 +56,24 @@ export default function App() {
     setTimeout(() => setToastMessage(''), 3000);
   };
 
+  const readStoredJSON = <T,>(key: string, fallback: T): T => {
+    if (typeof window === 'undefined') return fallback;
+
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return fallback;
+      return JSON.parse(raw) as T;
+    } catch {
+      return fallback;
+    }
+  };
+
   // INITAL DATA BOOTSTRAPPING FLOW
   useEffect(() => {
     // 1. Fetch Ebooks
-    const savedBooks = localStorage.getItem('app_ebooks');
-    if (savedBooks) {
-      try { setEbooks(JSON.parse(savedBooks)); } catch(e) { setEbooks(INITIAL_EBOOKS); }
-    } else {
-      setEbooks(INITIAL_EBOOKS);
-      localStorage.setItem('app_ebooks', JSON.stringify(INITIAL_EBOOKS));
-    }
+    const savedBooks = readStoredJSON<Ebook[]>('app_ebooks', INITIAL_EBOOKS);
+    setEbooks(savedBooks);
+    localStorage.setItem('app_ebooks', JSON.stringify(savedBooks));
 
     // 2. Fetch Users Directory
     const defaultUsersList: User[] = [
@@ -90,33 +98,24 @@ export default function App() {
         balance: 250000
       }
     ];
-    const savedUsers = localStorage.getItem('app_users');
-    if (savedUsers) {
-      try { setUsers(JSON.parse(savedUsers)); } catch(e) { setUsers(defaultUsersList); }
-    } else {
-      setUsers(defaultUsersList);
-      localStorage.setItem('app_users', JSON.stringify(defaultUsersList));
-    }
+    const savedUsers = readStoredJSON<User[]>('app_users', defaultUsersList);
+    setUsers(savedUsers);
+    localStorage.setItem('app_users', JSON.stringify(savedUsers));
 
     // 3. Fetch Reviews
-    const savedReviews = localStorage.getItem('app_reviews');
-    if (savedReviews) {
-      try { setReviews(JSON.parse(savedReviews)); } catch(e) { setReviews(INITIAL_REVIEWS); }
-    } else {
-      setReviews(INITIAL_REVIEWS);
-      localStorage.setItem('app_reviews', JSON.stringify(INITIAL_REVIEWS));
-    }
+    const savedReviews = readStoredJSON<Review[]>('app_reviews', INITIAL_REVIEWS);
+    setReviews(savedReviews);
+    localStorage.setItem('app_reviews', JSON.stringify(savedReviews));
 
     // 4. Fetch Transactions Jurnal
-    const savedTx = localStorage.getItem('app_transactions');
-    if (savedTx) {
-      try { setTransactions(JSON.parse(savedTx)); } catch(e) { setTransactions([]); }
-    }
+    const savedTx = readStoredJSON<Transaction[]>('app_transactions', []);
+    setTransactions(savedTx);
+    localStorage.setItem('app_transactions', JSON.stringify(savedTx));
 
     // 5. Fetch Active User login token
-    const storedUser = localStorage.getItem('current_user');
+    const storedUser = readStoredJSON<User | null>('current_user', null);
     if (storedUser) {
-      try { setCurrentUser(JSON.parse(storedUser)); } catch(e) {}
+      setCurrentUser(storedUser);
     }
   }, []);
 
@@ -139,7 +138,9 @@ export default function App() {
   };
 
   // Fetch cart details & items owned by logged-in user
-  const ownedBookIds = currentUser ? JSON.parse(localStorage.getItem(`owned_ebooks_${currentUser.id}`) || '["eb-5"]') : ['eb-5'];
+  const ownedBookIds = currentUser
+    ? readStoredJSON<string[]>(`owned_ebooks_${currentUser.id}`, ['eb-5'])
+    : ['eb-5'];
 
   // Handle Log Out
   const handleLogout = () => {
@@ -194,7 +195,7 @@ export default function App() {
     if (!currentUser) return;
 
     // 1. Deliver the books into client library
-    const oldLibrary: string[] = JSON.parse(localStorage.getItem(`owned_ebooks_${currentUser.id}`) || `["eb-5"]`);
+    const oldLibrary = readStoredJSON<string[]>(`owned_ebooks_${currentUser.id}`, ['eb-5']);
     const newLibrary = Array.from(new Set([...oldLibrary, ...purchasedIds]));
     localStorage.setItem(`owned_ebooks_${currentUser.id}`, JSON.stringify(newLibrary));
 
