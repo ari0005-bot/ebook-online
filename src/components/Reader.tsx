@@ -323,7 +323,7 @@ export default function Reader({ ebook, currentUser, onClose }: ReaderProps) {
       </div>
 
       {/* RIGHT AREA: Main Ebook Page Canvas rendering (The real reading panel) */}
-      <div className="flex-1 h-full flex flex-col overflow-hidden relative">
+      <div className="flex-1 h-full flex flex-col overflow-hidden relative glass-panel">
         
         {/* Top page layout stats info bar */}
         <div className={`py-4 px-6 border-b flex justify-between items-center shrink-0 ${getPaperBorder()}`}>

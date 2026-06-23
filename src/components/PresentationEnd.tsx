@@ -1,119 +1,173 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { BookOpen, RefreshCw, Bookmark, Sparkles, Laptop, Search, Sliders, ArrowRight } from 'lucide-react';
+import { Check, ShieldCheck, Zap, Crown, Sparkles, HelpCircle } from 'lucide-react';
 
-interface BenefitCardProps {
-  icon: React.ReactNode;
+interface PricingCardProps {
   title: string;
+  price: string;
   description: string;
+  features: string[];
+  isPopular?: boolean;
+  icon: React.ReactNode;
   idx: number;
-  key?: React.Key;
 }
 
-function BenefitCard({ icon, title, description, idx }: BenefitCardProps) {
+function PricingCard({ title, price, description, features, isPopular, icon, idx }: PricingCardProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 15 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: idx * 0.1, duration: 0.4 }}
-      className="p-6 bg-white rounded-2xl border border-slate-100 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col items-start text-left group"
+      className={`p-6 rounded-[2rem] flex flex-col justify-between relative transition-all duration-300 hover:-translate-y-1 ${
+        isPopular 
+          ? 'bg-slate-900 text-white shadow-xl ring-4 ring-blue-500/30' 
+          : 'bg-white border border-slate-200 text-slate-800 shadow-xs'
+      }`}
     >
-      <div className="p-3 bg-blue-50 text-blue-600 rounded-xl mb-4 group-hover:scale-110 transition-transform duration-300">
-        {icon}
+      {isPopular && (
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[10px] font-extrabold uppercase tracking-widest rounded-full shadow-md flex items-center gap-1">
+          <Sparkles className="w-3 h-3" /> Paling Populer
+        </span>
+      )}
+
+      <div>
+        {/* Header Paket */}
+        <div className="flex items-center justify-between mb-4">
+          <div className={`p-3 rounded-2xl ${isPopular ? 'bg-slate-800 text-blue-400' : 'bg-blue-50 text-blue-600'}`}>
+            {icon}
+          </div>
+          <span className={`text-xs font-bold px-2.5 py-1 rounded-md ${isPopular ? 'bg-white/10 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>
+            {title}
+          </span>
+        </div>
+
+        {/* Harga */}
+        <div className="my-4">
+          <span className="text-3xl font-black tracking-tight">{price}</span>
+          <span className={`text-xs ${isPopular ? 'text-slate-400' : 'text-slate-500'}`}> / bulan</span>
+        </div>
+
+        <p className={`text-xs leading-relaxed mb-6 ${isPopular ? 'text-slate-350' : 'text-slate-500'}`}>
+          {description}
+        </p>
+
+        <hr className={`my-4 ${isPopular ? 'border-slate-800' : 'border-slate-100'}`} />
+
+        {/* Daftar Fitur */}
+        <ul className="space-y-3 mb-8">
+          {features.map((feature, fIdx) => (
+            <li key={fIdx} className="flex items-start gap-2.5 text-xs">
+              <Check className={`w-4 h-4 shrink-0 mt-0.5 ${isPopular ? 'text-blue-400' : 'text-blue-600'}`} />
+              <span className={isPopular ? 'text-slate-350' : 'text-slate-650'}>{feature}</span>
+            </li>
+          ))}
+        </ul>
       </div>
-      <h4 className="text-lg font-semibold text-slate-800 mb-2">{title}</h4>
-      <p className="text-sm text-slate-500 leading-relaxed">{description}</p>
+
+      {/* Tombol Aksi */}
+      <button
+        className={`w-full py-3 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-xs uppercase tracking-wide ${
+          isPopular
+            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:opacity-95'
+            : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
+        }`}
+      >
+        Pilih Paket
+      </button>
     </motion.div>
   );
 }
 
 export default function PresentationEnd() {
-  const benefits = [
+  const plans = [
     {
-      icon: <BookOpen className="w-6 h-6" />,
-      title: 'Membaca Ebook Langsung',
-      description: 'Lupakan aplikasi pihak ketiga. Nikmati halaman demi halaman buku favorit langsung dari web browser Anda kapan pun.'
+      title: 'Lite Reader',
+      price: 'Rp 29.000',
+      description: 'Cocok untuk pembaca santai yang ingin menjelajahi literatur dasar tanpa komitmen besar.',
+      icon: <ShieldCheck className="w-5 h-5" />,
+      features: [
+        'Akses ke 50+ Ebook pilihan',
+        'Membaca langsung di web browser',
+        'Simpan hingga 5 bookmark harian',
+        'Satu perangkat aktif'
+      ]
     },
     {
-      icon: <RefreshCw className="w-6 h-6" />,
-      title: 'Progress Membaca Otomatis',
-      description: 'Sistem cerdas menyimpan persentase baca terakhir Anda. Buka perangkat apa pun, lanjutkan membaca di kalimat yang sama.'
+      title: 'Premium Member',
+      price: 'Rp 59.000',
+      description: 'Pilihan terbaik untuk pelajar dan profesional yang membutuhkan akses referensi luas dan fitur cerdas.',
+      icon: <Zap className="w-5 h-5" />,
+      isPopular: true,
+      features: [
+        'Akses UNLIMITED ke semua Katalog Ebook',
+        'Progress membaca otomatis di seluruh perangkat',
+        'Fitur Bookmark & Catatan Refleksi Tanpa Batas',
+        'Akses grup diskusi eksklusif & review buku',
+        'Prioritas rilis Ebook baru setiap minggu'
+      ]
     },
     {
-      icon: <Bookmark className="w-6 h-6" />,
-      title: 'Bookmark Halaman',
-      description: 'Tandai bab penting, simpan halaman kutipan favorit lengkap dengan catatan refleksi pribadi Anda.'
-    },
-    {
-      icon: <Sparkles className="w-6 h-6" />,
-      title: 'User Experience Lebih Baik',
-      description: 'Desain modern, transisi halaman mulus, visual cover yang menawan, serta fungsionalitas pencarian super cepat.'
-    },
-    {
-      icon: <Laptop className="w-6 h-6" />,
-      title: 'Responsive Desktop & Mobile',
-      description: 'Tampilan yang lentur beradaptasi sempurna pada laptop kerja Anda maupun layar smartphone saat bermacet-ria.'
-    },
-    {
-      icon: <Search className="w-6 h-6" />,
-      title: 'SEO Friendly',
-      description: 'Metadata kaya untuk memudahkan mesin pencari mengindeks katalog buku baru, mendongkrak visibilitas platform.'
-    },
-    {
-      icon: <Sliders className="w-6 h-6" />,
-      title: 'Personalisasi Ebook',
-      description: 'Rekomendasi buku berbasis minat Anda, review bintang, serta sejarah pembelian buku yang tersimpan rapi.'
+      title: 'Corporate / Fam',
+      price: 'Rp 149.000',
+      description: 'Paket bundling hemat untuk kebutuhan tim operasional, institusi pendidikan, maupun koleksi keluarga.',
+      icon: <Crown className="w-5 h-5" />,
+      features: [
+        'Semua fitur Premium Member',
+        'Hingga 5 akun anggota aktif',
+        'Dasbor monitoring membaca bagi admin grup',
+        'Metode pembayaran faktur/invoicing',
+        'Layanan bantuan prioritas 24/7'
+      ]
     }
   ];
 
   return (
-    <div className="max-w-5xl mx-auto py-12 px-4">
-      {/* Slide Badge */}
+    <div className="max-w-6xl mx-auto py-12 px-4">
+      {/* Badge Atas */}
       <div className="flex justify-center mb-4">
-        <span className="px-4 py-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full text-xs font-bold tracking-wider uppercase shadow-xs">
-          Slide Presentasi Terakhir
+        <span className="px-4 py-1.5 bg-blue-50 text-blue-600 rounded-full text-[10px] font-extrabold tracking-wider uppercase border border-blue-200">
+          Paket Layanan Pendidikan
         </span>
       </div>
 
-      <div className="text-center max-w-2xl mx-auto mb-12">
+      {/* Judul Utama */}
+      <div className="text-center max-w-2xl mx-auto mb-16">
         <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
-          Keunggulan <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Website Baru</span>
+          Investasi Pengetahuan Tanpa <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Batas Ruang</span>
         </h2>
-        <p className="text-slate-500 mt-3 text-sm md:text-base leading-relaxed">
-          Platform buku digital generasi berikutnya yang menjembatani kenyamanan membaca konvensional dengan kepraktisan teknologi modern.
+        <p className="text-slate-500 mt-3 text-sm leading-relaxed">
+          Pilih paket berlangganan bulanan yang paling sesuai dengan ritme belajar Anda. Batalkan atau tingkatkan keanggotaan kapan saja dengan mudah.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {benefits.map((b, i) => (
-          <BenefitCard
+      {/* Grid Paket Berlangganan */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch mb-16">
+        {plans.map((plan, i) => (
+          <PricingCard
             key={i}
-            icon={b.icon}
-            title={b.title}
-            description={b.description}
             idx={i}
+            title={plan.title}
+            price={plan.price}
+            description={plan.description}
+            icon={plan.icon}
+            features={plan.features}
+            isPopular={plan.isPopular}
           />
         ))}
+      </div>
 
-        {/* Call to action element as the last item to fill grid beautifully */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.7, duration: 0.4 }}
-          className="p-6 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl text-white flex flex-col justify-between items-start text-left shadow-sm hover:shadow-lg transition-all duration-300 md:col-span-1 lg:col-span-1"
-        >
+      {/* Footer Informasional Singkat */}
+      <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-left max-w-4xl mx-auto">
+        <div className="flex items-start gap-3">
+          <HelpCircle className="w-5 h-5 text-slate-400 mt-0.5 shrink-0" />
           <div>
-            <span className="text-xs bg-white/20 text-white font-medium px-2.5 py-1 rounded-md">MULAI SEKARANG</span>
-            <h4 className="text-xl font-bold mt-4 mb-2">Buktikan Sendiri Kemudahannya</h4>
-            <p className="text-white/80 text-xs leading-relaxed">
-              Jelajahi ratusan koleksi ebook terbaik, dapatkan sensasi membaca premium yang belum pernah ada sebelumnya.
-            </p>
+            <h5 className="text-xs font-bold text-slate-800 uppercase tracking-wide">Butuh Paket Kustom atau Akses Sekolah?</h5>
+            <p className="text-xs text-slate-500 mt-0.5">Hubungi tim kemitraan kami untuk mendapatkan penawaran khusus institusi formal dan program CSR.</p>
           </div>
-          <button className="mt-6 flex items-center gap-2 bg-white text-blue-600 px-4 py-2 rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors cursor-pointer group w-full justify-between">
-            <span>Masuk ke Katalog</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </button>
-        </motion.div>
+        </div>
+        <button className="px-4 py-2 bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-bold rounded-xl transition-all whitespace-nowrap cursor-pointer">
+          Hubungi Kami
+        </button>
       </div>
     </div>
   );

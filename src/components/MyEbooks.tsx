@@ -76,7 +76,7 @@ export default function MyEbooks({
       {activeTab === 'library' && (
         <div>
           {ownedEbooks.length === 0 ? (
-            <div className="p-12 bg-white rounded-3xl border border-dashed border-slate-200 text-center max-w-md mx-auto space-y-4">
+            <div className="p-12 glass-panel rounded-3xl border-dashed border-slate-200 text-center max-w-md mx-auto space-y-4 shadow-lift">
               <Award className="w-12 h-12 text-slate-300 mx-auto" />
               <h3 className="text-lg font-bold text-slate-800">Pustaka Buku Kosong</h3>
               <p className="text-slate-500 text-xs leading-relaxed">
@@ -100,7 +100,7 @@ export default function MyEbooks({
                 return (
                   <div 
                     key={eb.id}
-                    className="p-5 bg-white border border-slate-100 rounded-2xl shadow-2xs hover:shadow-xs hover:border-slate-200 transition-all flex gap-4 my-library-card"
+                    className="p-5 card-glow rounded-2xl transition-all hover:-translate-y-1 flex gap-4 my-library-card"
                   >
                     {/* Book Cover element */}
                     <img
@@ -159,7 +159,7 @@ export default function MyEbooks({
               {userTransactions.map((tx) => (
                 <div 
                   key={tx.id}
-                  className="p-5 bg-white border border-slate-150 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs shadow-2xs"
+                  className="p-5 glass-panel rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 text-xs"
                 >
                   <div className="space-y-1">
                     <strong className="text-slate-800 font-mono block mb-1">{tx.invoiceNumber}</strong>

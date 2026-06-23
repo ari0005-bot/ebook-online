@@ -85,7 +85,7 @@ export default function EbookDetail({
       </button>
 
       {/* Main Two-Column Panel */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 bg-white rounded-3xl border border-slate-100 p-6 md:p-8 shadow-xs mb-10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 glass-panel p-6 md:p-8 mb-10">
         
         {/* Cover image area */}
         <div className="lg:col-span-1 flex flex-col items-center">
@@ -115,7 +115,7 @@ export default function EbookDetail({
             </div>
 
             {/* Title & Author */}
-            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
+            <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight leading-tight glow-text">
               {ebook.title}
             </h2>
             <p className="text-sm text-slate-500">
@@ -143,7 +143,7 @@ export default function EbookDetail({
               {isOwned ? (
                 <button
                   onClick={() => onReadEbook(ebook)}
-                  className="w-full md:w-auto px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold shadow-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                  className="button-primary w-full md:w-auto px-6 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <BookOpen className="w-4 h-4" /> Baca Sekarang
                 </button>
@@ -152,7 +152,7 @@ export default function EbookDetail({
                   <button
                     onClick={() => onAddToCart(ebook)}
                     disabled={isInCart}
-                    className={`w-full md:w-auto px-6 py-3 rounded-xl text-sm font-bold shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${isInCart ? 'bg-slate-200 text-slate-500' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+                    className={`w-full md:w-auto px-6 py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 cursor-pointer ${isInCart ? 'bg-slate-200 text-slate-500' : 'button-primary'}`}
                   >
                     <ShoppingCart className="w-4 h-4" />
                     <span>{isInCart ? 'Sudah Di Keranjang' : 'Tambah Ke Keranjang'}</span>

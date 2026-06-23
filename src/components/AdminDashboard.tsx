@@ -169,7 +169,7 @@ export default function AdminDashboard({
         {/* SIDEBAR NAVIGATION: DESKTOP & MOBILE RESPONSIVE LAYOUT */}
         
         {/* Mobile Header Bar Section */}
-        <div className="md:hidden flex items-center justify-between bg-white border border-slate-100 p-4 rounded-2xl shadow-2xs">
+        <div className="md:hidden flex items-center justify-between glass-panel p-4 rounded-2xl shadow-lift">
           <span className="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-2">
             <span className="w-2.5 h-2.5 bg-rose-500 rounded-full animate-pulse shrink-0" />
             Modul Aktif: {menuItems.find(item => item.id === activeTab)?.label}
@@ -213,7 +213,7 @@ export default function AdminDashboard({
         )}
 
         {/* Desktop Sidebar Panel */}
-        <aside className="hidden md:flex flex-col w-64 shrink-0 bg-white border border-slate-100 rounded-3xl p-5 shadow-2xs space-y-6 h-fit sticky top-24">
+        <aside className="hidden md:flex flex-col w-64 shrink-0 glass-panel rounded-3xl p-5 shadow-lift space-y-6 h-fit sticky top-24">
           <div className="border-b border-slate-100 pb-4">
             <strong className="text-xs text-slate-400 font-bold uppercase tracking-widest block mb-1">NAVIGASI MODUL</strong>
             <p className="text-[10px] text-slate-500">Pilih alat pantau administrator dibawah.</p>

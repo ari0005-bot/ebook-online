@@ -163,7 +163,7 @@ export default function Auth({ onLoginSuccess, onClose }: AuthProps) {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto bg-white rounded-3xl shadow-xl border border-slate-100 p-8 relative overflow-hidden">
+    <div className="w-full max-w-md mx-auto glass-panel rounded-[2rem] p-8 relative overflow-hidden">
       
       {/* Dynamic Background Circle Accent */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full filter blur-xl -mr-16 -mt-16 -z-10" />
@@ -286,7 +286,7 @@ export default function Auth({ onLoginSuccess, onClose }: AuthProps) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white rounded-xl text-sm font-semibold tracking-wide shadow-xs active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer mt-6"
+            className="w-full py-2.5 button-primary disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm font-semibold tracking-wide shadow-xs active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer mt-6"
           >
             {loading ? (
               <RefreshCcw className="w-4 h-4 animate-spin" />
@@ -322,7 +322,7 @@ export default function Auth({ onLoginSuccess, onClose }: AuthProps) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white rounded-xl text-sm font-semibold shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-2.5 button-primary disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm font-semibold shadow-xs flex items-center justify-center gap-2 cursor-pointer"
           >
             {loading ? <RefreshCcw className="w-4 h-4 animate-spin" /> : 'Verifikasi Akun Saya'}
           </button>
