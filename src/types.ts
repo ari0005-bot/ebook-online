@@ -18,10 +18,12 @@ export interface Ebook {
   price: number;
   rating: number;
   category: string;
-  pages: string[]; // Content of the ebook split by pages
+  pages: string[];
   isPopular: boolean;
   isNew: boolean;
   dateAdded: string;
+  originalPrice?: number;   // Untuk diskon harga coret
+  reviewsCount?: number;    // Jumlah total review
 }
 
 export interface CartItem {
@@ -74,4 +76,6 @@ export interface Article {
   date: string;
   coverUrl: string;
   readTime: string;
+  author: string;
+  authorAvatar?: string;
 }

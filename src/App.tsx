@@ -58,6 +58,9 @@ export default function App() {
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'info' | 'success'>('info');
 
+  // ===== TAMBAHAN SPLASH SCREEN STATE =====
+  const [showSplash, setShowSplash] = useState(true);
+
   // Trigger temporary floating Toast alerts
   const showToast = (msg: string, type: 'info' | 'success' = 'info') => {
     setToastMessage(msg);
@@ -65,7 +68,7 @@ export default function App() {
     setTimeout(() => setToastMessage(''), 3000);
   };
 
-  // INITAL DATA BOOTSTRAPPING FLOW
+  // INITIAL DATA BOOTSTRAPPING FLOW
   useEffect(() => {
     // 1. Fetch Ebooks
     const savedBooks = localStorage.getItem('app_ebooks');
@@ -125,38 +128,47 @@ export default function App() {
     // 5. Fetch Active User login token
     const storedUser = localStorage.getItem('current_user');
     if (storedUser) {
-      try { setCurrentUser(JSON.parse(storedUser)); } catch(e) {}
+      try { 
+        const parsedUser = JSON.parse(storedUser);
+        setCurrentUser(parsedUser);
+        // Menjaga halaman tetap sinkron dengan role setelah refresh
+        if (parsedUser.role === 'admin') {
+          setActivePage('admin');
+        }
+      } catch (e) {}
     }
+
+    // ===== TAMBAHAN SPLASH SCREEN TIMEOUT =====
+    // Splash screen akan menutup setelah 2.5 detik ketika bootstrapping data selesai
+    const splashTimer = setTimeout(() => {
+      setShowSplash(false);
+    }, 2500);
+
+    return () => clearTimeout(splashTimer);
   }, []);
 
-  // mark that the user has seen the landing page (persisted)
   const markSeenLanding = () => {
     try { localStorage.setItem('has_seen_landing', '1'); } catch(e) {}
     setHasSeenLanding(true);
   };
 
-  // Sync state modifications dynamically with LocalStorage of ebooks
   const saveEbooksState = (newList: Ebook[]) => {
     setEbooks(newList);
     localStorage.setItem('app_ebooks', JSON.stringify(newList));
   };
 
-  // Sync users state modifications
   const saveUsersState = (newList: User[]) => {
     setUsers(newList);
     localStorage.setItem('app_users', JSON.stringify(newList));
   };
 
-  // Sync reviews state modifications
   const saveReviewsState = (newList: Review[]) => {
     setReviews(newList);
     localStorage.setItem('app_reviews', JSON.stringify(newList));
   };
 
-  // Fetch cart details & items owned by logged-in user
   const ownedBookIds = currentUser ? JSON.parse(localStorage.getItem(`owned_ebooks_${currentUser.id}`) || '["eb-5"]') : ['eb-5'];
 
-  // Handle Log Out
   const handleLogout = () => {
     localStorage.removeItem('current_user');
     setCurrentUser(null);
@@ -165,22 +177,27 @@ export default function App() {
     showToast('Berhasil keluar dari sesi akun. Sampai jumpa kembali!', 'info');
   };
 
-  // Handle Login and auto Sync balances
+  // HANDLER LOGIN DENGAN REDIRECT AUTOMATIS BERDASARKAN ROLE
   const handleLoginSuccess = (userPayload: User) => {
     setCurrentUser(userPayload);
     setShowAuthModal(false);
     
-    // Auto register into general users if new
     const userExistCheck = users.some(u => u.id === userPayload.id || u.email === userPayload.email);
     if (!userExistCheck) {
       const updatedUsers = [...users, userPayload];
       saveUsersState(updatedUsers);
     }
 
-    showToast(`Selamat datang kembali, ${userPayload.fullName}!`, 'success');
+    // Pengecekan Hak Akses Halaman
+    if (userPayload.role === 'admin') {
+      setActivePage('admin');
+      showToast(`Selamat datang Admin, ${userPayload.fullName}!`, 'success');
+    } else {
+      setActivePage('dashboard');
+      showToast(`Selamat datang kembali, ${userPayload.fullName}!`, 'success');
+    }
   };
 
-  // Add items into Shopping Cart
   const handleAddToCart = (book: Ebook) => {
     if (!currentUser) {
       if (!hasSeenLanding) {
@@ -194,7 +211,6 @@ export default function App() {
     }
 
     if (cartIds.includes(book.id)) {
-      // Toggle off / remove from cart logic
       setCartIds(prev => prev.filter(id => id !== book.id));
       showToast('Buku dikeluarkan dari keranjang belanja.', 'info');
     } else {
@@ -203,41 +219,33 @@ export default function App() {
     }
   };
 
-  // Remove individual items from checkout lists
   const handleRemoveFromCart = (book: Ebook) => {
     setCartIds(prev => prev.filter(id => id !== book.id));
     showToast('Buku dikeluarkan dari keranjang belanja.', 'info');
   };
 
-  // Complete Payment and update virtual resources
   const handleCheckoutSuccess = (purchasedIds: string[], txRecord: Transaction, newBalance: number) => {
     if (!currentUser) return;
 
-    // 1. Deliver the books into client library
     const oldLibrary: string[] = JSON.parse(localStorage.getItem(`owned_ebooks_${currentUser.id}`) || `["eb-5"]`);
     const newLibrary = Array.from(new Set([...oldLibrary, ...purchasedIds]));
     localStorage.setItem(`owned_ebooks_${currentUser.id}`, JSON.stringify(newLibrary));
 
-    // 2. Adjust central transactions list
     const updatedTx = [txRecord, ...transactions];
     setTransactions(updatedTx);
     localStorage.setItem('app_transactions', JSON.stringify(updatedTx));
 
-    // 3. Adjust user virtual credit balances
     const updatedUser: User = { ...currentUser, balance: newBalance };
     setCurrentUser(updatedUser);
     localStorage.setItem('current_user', JSON.stringify(updatedUser));
 
-    // 4. Update the core directory user ledger
     const revisedUsers = users.map(u => u.id === currentUser.id ? updatedUser : u);
     saveUsersState(revisedUsers);
 
-    // 5. Clear cart
     setCartIds([]);
     showToast('Pembayaran selesai! Ebook Anda siap digali.', 'success');
   };
 
-  // Profile Virtual Wallet Credit Injector
   const handleWalletTopUp = (amount: number) => {
     if (!currentUser) return;
     const nextBalance = currentUser.balance + amount;
@@ -252,7 +260,6 @@ export default function App() {
     showToast(`Topup berhasil! Saldo digital bertambah ${amount.toLocaleString('id-ID')}`, 'success');
   };
 
-  // Add Ebook review state logic
   const handleAddReview = (newReviewFields: Omit<Review, 'id' | 'date'>) => {
     const freshReview: Review = {
       ...newReviewFields,
@@ -263,7 +270,6 @@ export default function App() {
     const newReviewsList = [freshReview, ...reviews];
     saveReviewsState(newReviewsList);
 
-    // Dynamic Recalculate book average rating based on newly posted stars
     const targetBookReviews = newReviewsList.filter(r => r.ebookId === newReviewFields.ebookId);
     if (targetBookReviews.length > 0) {
       const avg = targetBookReviews.reduce((sum, item) => sum + item.rating, 0) / targetBookReviews.length;
@@ -275,7 +281,6 @@ export default function App() {
       });
       saveEbooksState(revisedEbooks);
       
-      // update selected view if detailed
       if (selectedEbook && selectedEbook.id === newReviewFields.ebookId) {
         setSelectedEbook({ ...selectedEbook, rating: parseFloat(avg.toFixed(1)) });
       }
@@ -283,28 +288,24 @@ export default function App() {
     showToast('Ulasan Anda berhasil dikirim!', 'success');
   };
 
-  // Admin: CRUD Operasi Tambah Ebook
   const handleAdminAddEbook = (created: Ebook) => {
     const updated = [created, ...ebooks];
     saveEbooksState(updated);
     showToast(`Ebook '${created.title}' berhasil didaftarkan ke toko!`, 'success');
   };
 
-  // Admin: CRUD Operasi Edit Ebook
   const handleAdminEditEbook = (edited: Ebook) => {
     const updated = ebooks.map(eb => eb.id === edited.id ? edited : eb);
     saveEbooksState(updated);
     showToast(`Ebook '${edited.title}' diperbaharui dengan sukses!`, 'success');
   };
 
-  // Admin: CRUD Operasi Delete Ebook
   const handleAdminDeleteEbook = (id: string) => {
     const updated = ebooks.filter(eb => eb.id !== id);
     saveEbooksState(updated);
     showToast('Ebook didelete selamanya dari directory.', 'info');
   };
 
-  // Admin Control: Update User Role (Admin vs User)
   const handleAdminUpdateRole = (uId: string, rolePayload: 'user' | 'admin') => {
     const updated = users.map(u => {
       if (u.id === uId) {
@@ -321,7 +322,6 @@ export default function App() {
     showToast('Hak akses akun user berhasil diubah.', 'success');
   };
 
-  // Admin Control: Inject customer virtual balances
   const handleAdminInjectBalance = (uId: string, amount: number) => {
     const updated = users.map(u => {
       if (u.id === uId) {
@@ -338,13 +338,68 @@ export default function App() {
     showToast(`Kredit balance user disuntik ${amount.toLocaleString('id-ID')}`, 'success');
   };
 
-  // Filter list of popular ebooks (Popularity rating > 4.6 or flag)
   const popularEbooks = ebooks.filter(eb => eb.isPopular).slice(0, 4);
 
   return (
     <div className="app-shell min-h-screen flex flex-col font-sans select-none pb-12">
       
-      {/* Toast popup Alert widget */}
+      {/* ===== 1. COMPONENT SPLASH SCREEN (MENGGUNAKAN ANIMATEPRESENCE) ===== */}
+      <AnimatePresence>
+        {showSplash && (
+          <motion.div
+            key="splash-screen"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, ease: 'easeInOut' }}
+            className="fixed inset-0 bg-slate-950 flex flex-col justify-center items-center z-[99999]"
+          >
+            <div className="text-center space-y-6">
+              {/* Logo Box Animasi */}
+              <motion.div
+                animate={{ 
+                  scale: [1, 1.05, 1],
+                  opacity: [0.8, 1, 0.8]
+                }}
+                transition={{ 
+                  duration: 2, 
+                  repeat: Infinity, 
+                  ease: "easeInOut" 
+                }}
+                className="w-20 h-20 bg-gradient-to-tr from-[#c8963e] to-[#ab7f30] rounded-3xl flex items-center justify-center mx-auto shadow-xl shadow-amber-500/10"
+              >
+                <Sparkles className="w-10 h-10 text-white" />
+              </motion.div>
+
+              {/* Judul Branding Website */}
+              <div className="space-y-1">
+                <h1 className="text-3xl font-black tracking-wider text-white font-serif">
+                  e.mind
+                </h1>
+                <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-bold">
+                  The LOCAL Enablers
+                </p>
+              </div>
+
+              {/* Loader Loading Linear */}
+              <div className="w-32 h-[3px] bg-slate-900 rounded-full mx-auto overflow-hidden relative">
+                <motion.div 
+                  className="h-full bg-gradient-to-r from-[#c8963e] to-[#ab7f30] rounded-full absolute left-0 top-0"
+                  animate={{ 
+                    width: ["0%", "100%"],
+                    left: ["0%", "0%"]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {toastMessage && (
           <motion.div 
@@ -364,9 +419,13 @@ export default function App() {
       <header className="sticky top-0 z-40 bg-white shadow-md border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between gap-4 py-2">
           
-          {/* Brand Logo */}
           <div 
-            onClick={() => { setActivePage('home'); setSelectedEbook(null); }}
+            onClick={() => { 
+              if (!currentUser || currentUser.role !== 'admin') {
+                setActivePage('home'); 
+                setSelectedEbook(null); 
+              }
+            }}
             className="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity"
           >
             <img 
@@ -376,62 +435,85 @@ export default function App() {
             />
           </div>
 
-          {/* Center Navigation - Hidden on Mobile */}
+          {/* DYNAMIC CENTER NAVIGATION BERDASARKAN STATUS LOGIN & ROLE */}
           <nav className="hidden lg:flex items-center gap-0.5 text-xs font-bold text-slate-600 uppercase tracking-wider">
-            {[{page: 'home', label: 'Beranda'}, {page: 'catalog', label: 'Katalog'}, {page: 'my-ebooks', label: 'Ebook Saya'}, {page: 'dashboard', label: 'Dashboard'}].map(({page, label}) => (
+            
+            {/* TAMPILAN GUEST ATAU USER BIASA */}
+            {(!currentUser || currentUser.role !== 'admin') && (
+              <>
+                <button
+                  onClick={() => { setActivePage('home'); setSelectedEbook(null); }}
+                  className={`px-3 py-2 rounded-lg transition-all ${activePage === 'home' ? 'bg-primary-100 text-primary-700 font-bold' : 'text-slate-600 hover:text-primary-600 hover:bg-slate-100'}`}
+                >
+                  Beranda
+                </button>
+                <button
+                  onClick={() => { setActivePage('catalog'); setSelectedEbook(null); }}
+                  className={`px-3 py-2 rounded-lg transition-all ${activePage === 'catalog' ? 'bg-primary-100 text-primary-700 font-bold' : 'text-slate-600 hover:text-primary-600 hover:bg-slate-100'}`}
+                >
+                  Katalog
+                </button>
+              </>
+            )}
+
+            {/* DASHBOARD USER (Hanya Tampil Jika Sudah Login Sebagai User) */}
+            {currentUser && currentUser.role === 'user' && (
               <button
-                key={page}
-                onClick={() => { setActivePage(page as any); setSelectedEbook(null); }}
-                className={`px-3 py-2 rounded-lg transition-all ${
-                  activePage === page 
-                    ? 'bg-primary-100 text-primary-700 font-bold' 
-                    : 'text-slate-600 hover:text-primary-600 hover:bg-slate-100'
-                }`}
+                onClick={() => { setActivePage('dashboard'); setSelectedEbook(null); }}
+                className={`px-3 py-2 rounded-lg transition-all ${activePage === 'dashboard' ? 'bg-primary-100 text-primary-700 font-bold' : 'text-slate-600 hover:text-primary-600 hover:bg-slate-100'}`}
               >
-                {label}
+                Dashboard
               </button>
-            ))}
-            <button 
-              onClick={() => { setActivePage('presentation'); setSelectedEbook(null); }}
-              className={`px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 ${
-                activePage === 'presentation' 
-                  ? 'bg-pink-100 text-pink-700 font-bold' 
-                  : 'text-slate-600 hover:text-pink-600 hover:bg-slate-100'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Keunggulan</span>
-            </button>
+            )}
+
+            {/* DASHBOARD ADMIN (Hanya Tampil Jika Login Sebagai Admin) */}
+            {currentUser && currentUser.role === 'admin' && (
+              <button
+                onClick={() => { setActivePage('admin'); setSelectedEbook(null); }}
+                className={`px-3 py-2 rounded-lg transition-all ${activePage === 'admin' ? 'bg-pink-100 text-pink-700 font-bold' : 'text-slate-600 hover:text-pink-600 hover:bg-slate-100'}`}
+              >
+                Dashboard Admin
+              </button>
+            )}
+
+            {(!currentUser || currentUser.role !== 'admin') && (
+              <button 
+                onClick={() => { setActivePage('presentation'); setSelectedEbook(null); }}
+                className={`px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 ${activePage === 'presentation' ? 'bg-pink-100 text-pink-700 font-bold' : 'text-slate-600 hover:text-pink-600 hover:bg-slate-100'}`}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Keunggulan</span>
+              </button>
+            )}
           </nav>
 
           {/* Right Actions */}
           <div className="flex items-center gap-2 lg:gap-3">
-            {/* Cart */}
-            <button
-              onClick={() => { setActivePage('cart'); setSelectedEbook(null); }}
-              className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all cursor-pointer relative"
-            >
-              <ShoppingCart className="w-4 h-4" />
-              {cartIds.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-primary-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold shadow-md">
-                  {cartIds.length}
-                </span>
-              )}
-            </button>
+            {(!currentUser || currentUser.role !== 'admin') && (
+              <button
+                onClick={() => { setActivePage('cart'); setSelectedEbook(null); }}
+                className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all cursor-pointer relative"
+              >
+                <ShoppingCart className="w-4 h-4" />
+                {cartIds.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold shadow-md">
+                    {cartIds.length}
+                  </span>
+                )}
+              </button>
+            )}
 
             {currentUser ? (
               <div className="flex items-center gap-2">
-                {currentUser.role === 'admin' && (
-                  <button
-                    onClick={() => { setActivePage('admin'); setSelectedEbook(null); }}
-                    className="hidden sm:flex items-center gap-1 bg-pink-100 hover:bg-pink-200 text-pink-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                  >
-                    <Laptop className="w-3.5 h-3.5" />
-                    <span>Admin</span>
-                  </button>
-                )}
                 <button
-                  onClick={() => { setActivePage('profile'); setSelectedEbook(null); }}
+                  onClick={() => { 
+                    if (currentUser.role === 'admin') {
+                      setActivePage('admin');
+                    } else {
+                      setActivePage('profile');
+                    }
+                    setSelectedEbook(null); 
+                  }}
                   className="w-8 h-8 rounded-lg overflow-hidden border-2 border-slate-300 hover:border-primary-500 transition-all hover:scale-105 cursor-pointer"
                 >
                   <img src={currentUser.avatar} alt={currentUser.username} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
@@ -459,7 +541,6 @@ export default function App() {
       {/* MAIN SCREEN ROUTER */}
       <main className="flex-grow">
 
-        {/* First-visit overlay: force user to view landing before login */}
         {!hasSeenLanding && (
           <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
             <div className="w-full max-w-2xl bg-white rounded-3xl p-8 text-center shadow-lift">
@@ -481,14 +562,7 @@ export default function App() {
         
         <AnimatePresence mode="wait">
           {activePage === 'home' && (
-            <motion.div
-              key="home"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.32, ease: 'easeOut' }}
-              className="page-transition"
-            >
+            <motion.div key="home" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.32, ease: 'easeOut' }}>
               <LandingPage
                 ebooks={ebooks}
                 popularEbooks={popularEbooks}
@@ -501,14 +575,7 @@ export default function App() {
           )}
 
           {activePage === 'catalog' && (
-            <motion.div
-              key="catalog"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.32, ease: 'easeOut' }}
-              className="page-transition"
-            >
+            <motion.div key="catalog" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.32, ease: 'easeOut' }}>
               <Catalog
                 ebooks={ebooks}
                 currentUser={currentUser}
@@ -522,14 +589,7 @@ export default function App() {
           )}
 
           {activePage === 'detail' && selectedEbook && (
-            <motion.div
-              key="detail"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.32, ease: 'easeOut' }}
-              className="page-transition"
-            >
+            <motion.div key="detail" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.32, ease: 'easeOut' }}>
               <EbookDetail
                 ebook={selectedEbook}
                 allEbooks={ebooks}
@@ -546,14 +606,7 @@ export default function App() {
           )}
 
           {activePage === 'cart' && (
-            <motion.div
-              key="cart"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.32, ease: 'easeOut' }}
-              className="page-transition"
-            >
+            <motion.div key="cart" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.32, ease: 'easeOut' }}>
               <CartCheckout
                 cartItems={ebooks.filter(b => cartIds.includes(b.id))}
                 currentUser={currentUser}
@@ -565,35 +618,8 @@ export default function App() {
             </motion.div>
           )}
 
-          {activePage === 'my-ebooks' && (
-            <motion.div
-              key="my-ebooks"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.32, ease: 'easeOut' }}
-              className="page-transition"
-            >
-              <MyEbooks
-                allEbooks={ebooks}
-                currentUser={currentUser}
-                ownedBookIds={ownedBookIds}
-                transactions={transactions}
-                onReadEbook={(eb) => setActiveReadingBook(eb)}
-                onNavigateToCatalog={() => setActivePage('catalog')}
-              />
-            </motion.div>
-          )}
-
           {activePage === 'profile' && (
-            <motion.div
-              key="profile"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.32, ease: 'easeOut' }}
-              className="page-transition"
-            >
+            <motion.div key="profile" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.32, ease: 'easeOut' }}>
               <Profile
                 currentUser={currentUser}
                 transactions={transactions}
@@ -609,83 +635,79 @@ export default function App() {
             </motion.div>
           )}
 
+          {/* PROTEKSI DASHBOARD USER */}
           {activePage === 'dashboard' && (
-            <motion.div
-              key="dashboard"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.32, ease: 'easeOut' }}
-              className="page-transition"
-            >
-              <UserDashboard
-                currentUser={currentUser}
-                allEbooks={ebooks}
-                transactions={transactions}
-                ownedBookIds={ownedBookIds}
-                onNavigateToCatalog={() => setActivePage('catalog')}
-                onReadEbook={(eb) => setActiveReadingBook(eb)}
-                onTopUp={handleWalletTopUp}
-              />
+            <motion.div key="dashboard" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.32, ease: 'easeOut' }}>
+              {currentUser && currentUser.role === 'user' ? (
+                <UserDashboard
+                  currentUser={currentUser}
+                  allEbooks={ebooks}
+                  transactions={transactions}
+                  ownedBookIds={ownedBookIds}
+                  onNavigateToCatalog={() => setActivePage('catalog')}
+                  onReadEbook={(eb) => setActiveReadingBook(eb)}
+                  onTopUp={handleWalletTopUp}
+                />
+              ) : (
+                <div className="max-w-md mx-auto text-center py-20 px-4">
+                  <p className="text-slate-500 mb-4">Silakan masuk menggunakan akun User untuk mengakses dashboard Anda.</p>
+                  <button onClick={() => setShowAuthModal(true)} className="px-5 py-2 bg-primary-600 text-white rounded-xl font-bold shadow-md hover:bg-primary-700 transition-all">
+                    Masuk Sekarang
+                  </button>
+                </div>
+              )}
             </motion.div>
           )}
 
           {activePage === 'presentation' && (
-            <motion.div
-              key="presentation"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.32, ease: 'easeOut' }}
-              className="page-transition"
-            >
+            <motion.div key="presentation" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.32, ease: 'easeOut' }}>
               <PresentationEnd />
             </motion.div>
           )}
 
+          {/* PROTEKSI DASHBOARD ADMIN */}
           {activePage === 'admin' && (
-            <motion.div
-              key="admin"
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -16 }}
-              transition={{ duration: 0.32, ease: 'easeOut' }}
-              className="page-transition"
-            >
-              <AdminDashboard
-                ebooks={ebooks}
-                users={users}
-                transactions={transactions}
-                onAddEbook={handleAdminAddEbook}
-                onEditEbook={handleAdminEditEbook}
-                onDeleteEbook={handleAdminDeleteEbook}
-                onUpdateUserRole={handleAdminUpdateRole}
-                onInjectUserBalance={handleAdminInjectBalance}
-              />
+            <motion.div key="admin" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -16 }} transition={{ duration: 0.32, ease: 'easeOut' }}>
+              {currentUser && currentUser.role === 'admin' ? (
+                <AdminDashboard
+                  ebooks={ebooks}
+                  users={users}
+                  transactions={transactions}
+                  onAddEbook={handleAdminAddEbook}
+                  onEditEbook={handleAdminEditEbook}
+                  onDeleteEbook={handleAdminDeleteEbook}
+                  onUpdateUserRole={handleAdminUpdateRole}
+                  onInjectUserBalance={handleAdminInjectBalance}
+                />
+              ) : (
+                <div className="max-w-md mx-auto text-center py-20 px-4">
+                  <ShieldAlert className="w-12 h-12 text-red-500 mx-auto mb-3" />
+                  <p className="text-red-600 font-bold mb-2">Akses Ditolak</p>
+                  <p className="text-slate-500 text-sm">Halaman ini dilindungi dan hanya dapat diakses oleh Admin Utama.</p>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
       </main>
 
-      {/* FLOAT DEMO PERSONALITY TOGGLE BAR AT FOOTER FOR EASY GRADING */}
+      {/* SINKRONISASI DEMO TOGGLER UNTUK KEPENTINGAN DEMO/TESTING */}
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-55 bg-slate-900 text-white rounded-full px-4 py-2 flex items-center gap-3 shadow-lg border border-slate-800 text-[10px] md:text-xs">
         <span className="text-amber-400 font-bold shrink-0 hidden sm:inline">⚡ DEMO TOGGLER:</span>
         <button
           onClick={() => {
-            // Sign in as Guest
             localStorage.removeItem('current_user');
             setCurrentUser(null);
             setCartIds([]);
             setActivePage('home');
-            showToast('Beralih sebagai Pengunjung (Belum Login-Guest)', 'info');
+            showToast('Beralih sebagai Pengunjung (Guest)', 'info');
           }}
-          className={`px-3 py-1 rounded-full cursor-pointer font-bold ${currentUser === null ? 'bg-blue-600 text-white shadow-xs' : 'hover:bg-slate-850 text-slate-400'}`}
+          className={`px-3 py-1 rounded-full cursor-pointer font-bold ${currentUser === null ? 'bg-blue-600 text-white' : 'hover:bg-slate-850 text-slate-400'}`}
         >
           Guest
         </button>
         <button
           onClick={() => {
-            // Sign in as user Budi
             const budi: User = {
               id: 'usr-customer',
               email: 'budi@example.com',
@@ -699,15 +721,15 @@ export default function App() {
             localStorage.setItem('current_user', JSON.stringify(budi));
             setCurrentUser(budi);
             setCartIds([]);
-            showToast('Seksi User Budi Hartono diaktifkan.', 'success');
+            setActivePage('dashboard'); // Otomatis ke dashboard user
+            showToast('Sesi User Budi Hartono diaktifkan.', 'success');
           }}
-          className={`px-3 py-1 rounded-full cursor-pointer font-bold ${currentUser?.id === 'usr-customer' ? 'bg-blue-600 text-white shadow-xs' : 'hover:bg-slate-850 text-slate-400'}`}
+          className={`px-3 py-1 rounded-full cursor-pointer font-bold ${currentUser?.id === 'usr-customer' ? 'bg-blue-600 text-white' : 'hover:bg-slate-850 text-slate-400'}`}
         >
           Budi (User)
         </button>
         <button
           onClick={() => {
-            // Sign in as Admin Utama
             const adm: User = {
               id: 'usr-admin',
               email: 'admin@example.com',
@@ -715,104 +737,53 @@ export default function App() {
               fullName: 'Admin Utama LuminaBook',
               role: 'admin',
               verified: true,
-              avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&q=80&w=150',
+              avatar: 'https://images.unsplash.com/photo-1570295999915-56ceb5ecca61?auto=format&fit=crop&q=80&w=150',
               balance: 1000000
             };
             localStorage.setItem('current_user', JSON.stringify(adm));
             setCurrentUser(adm);
             setCartIds([]);
-            showToast('Seksi Admin Utama diaktifkan! Silakan akses Panel Admin di navigasi pilar.', 'success');
+            setActivePage('admin'); // Otomatis langsung masuk dashboard admin
+            showToast('Sesi Admin Utama Aktif!', 'success');
           }}
-          className={`px-3 py-1 rounded-full cursor-pointer font-bold ${currentUser?.id === 'usr-admin' ? 'bg-blue-600 text-white shadow-xs' : 'hover:bg-slate-850 text-slate-400'}`}
+          className={`px-3 py-1 rounded-full cursor-pointer font-bold ${currentUser?.id === 'usr-admin' ? 'bg-blue-600 text-white' : 'hover:bg-slate-850 text-slate-400'}`}
         >
           Admin
         </button>
       </div>
 
-      {/* FOOTER GENERAL INFO */}
       <footer className="max-w-7xl mx-auto px-4 pt-16 mt-8 border-t border-slate-205 text-center text-xs text-slate-455">
         <p className="font-semibold text-slate-650">Sistem Website Ebook Online © 2026</p>
         <p className="mt-1">Dibuat dengan dedikasi kepatuhan penuh atas spesifikasi 10 Modul Interaktif bagi Ebook online premium.</p>
       </footer>
 
-      {/* FULL-SCREEN ACTIVE READER OVERLAY DETECTOR */}
       {activeReadingBook && (
         <Reader
           ebook={activeReadingBook}
           currentUser={currentUser}
-          onClose={() => {
-            setActiveReadingBook(null);
-            // Refresh library progress percentages
-            if (activePage === 'my-ebooks') {
-              setActivePage('home');
-              setTimeout(() => setActivePage('my-ebooks'), 50);
-            }
-          }}
+          onClose={() => setActiveReadingBook(null)}
         />
       )}
 
-      {/* AUTH SELECTION MODAL OVERLAY */}
       {showAuthModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="relative w-full max-w-md">
-            {/* Close trigger button */}
-            <button
-              onClick={() => setShowAuthModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer z-10"
-            >
+            <button onClick={() => setShowAuthModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer z-10">
               <X className="w-5 h-5" />
             </button>
-            <Auth
-              onLoginSuccess={handleLoginSuccess}
-              onClose={() => setShowAuthModal(false)}
-            />
+            <Auth onLoginSuccess={handleLoginSuccess} onClose={() => setShowAuthModal(false)} />
           </div>
         </div>
       )}
 
-      {/* DETAILED ARTICLE READER DIALOG */}
       {activeArticle && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-2xl bg-white rounded-3xl overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh]"
-          >
-            {/* Close Button overlay */}
-            <button
-              onClick={() => setActiveArticle(null)}
-              className="absolute top-4 right-4 p-2 bg-black/50 text-white hover:bg-black/75 rounded-full cursor-pointer z-10"
-            >
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-2xl bg-white rounded-3xl overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh]">
+            <button onClick={() => setActiveArticle(null)} className="absolute top-4 right-4 p-2 bg-black/50 text-white hover:bg-black/75 rounded-full cursor-pointer z-10">
               <X className="w-4 h-4" />
             </button>
-
-            {/* Cover image header */}
             <div className="h-56 bg-slate-100 overflow-hidden relative">
-              <img
-                src={activeArticle.coverUrl}
-                alt={activeArticle.title}
-                referrerPolicy="no-referrer"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 flex flex-col justify-end text-white">
-                <span className="text-[10px] bg-blue-600 font-bold px-2 py-0.5 rounded uppercase tracking-wider block w-fit mb-1.5">{activeArticle.category}</span>
-                <h3 className="text-lg md:text-xl font-bold leading-tight">{activeArticle.title}</h3>
-                <span className="text-[10px] opacity-75 mt-1 block">{activeArticle.date} • {activeArticle.readTime}</span>
-              </div>
-            </div>
-
-            {/* Scrollable text body */}
-            <div className="p-6 md:p-8 overflow-y-auto text-xs md:text-sm text-slate-700 leading-relaxed text-justify whitespace-pre-wrap font-sans">
-              {activeArticle.content}
-            </div>
-
-            <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
-              <button
-                onClick={() => setActiveArticle(null)}
-                className="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl cursor-pointer"
-              >
-                Tutup Bacaan
-              </button>
+              <img src={activeArticle.coverUrl} alt={activeArticle.title} className="w-full h-full object-cover" />
             </div>
           </motion.div>
         </div>
