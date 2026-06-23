@@ -498,7 +498,7 @@ export default function LandingPage({ ebooks, popularEbooks, setActivePage, setS
       <footer className="mt-16 bg-slate-900 text-white">
         <div className="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 md:grid-cols-5 gap-8 mb-10">
           <div className="md:col-span-2 space-y-4">
-            <img src="/assets/branding-logo.png" alt="The LOCAL Enablers - e.mind" className="h-16 w-auto object-contain" />
+            <img src="/assets/branding-logo.png" alt="The LOCAL Enablers - e.mind" className="h-20 w-auto object-contain scale-125" />
             <p className="text-sm text-slate-300 leading-relaxed max-w-sm">Memberdayakan komunitas lokal melalui akses konten berkualitas tinggi. Platform digital library eksklusif dari The LOCAL Enablers.</p>
           </div>
           <div className="space-y-3">

@@ -433,7 +433,7 @@ export default function App() {
             <img 
               src="/assets/branding-logo.png" 
               alt="The LOCAL Enablers - e.mind" 
-              className="h-14 w-auto object-contain"
+              className="h-20 w-auto object-contain scale-125"
             />
           </div>
 
