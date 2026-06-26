@@ -13,105 +13,126 @@ export const EBOOK_CATEGORIES = [
 export const INITIAL_EBOOKS: Ebook[] = [
   {
     id: 'eb-1',
-    title: 'Filosofi Teras',
-    author: 'Henry Manampiring',
-    category: 'Pengembangan Diri',
-    price: 85000,
-    originalPrice: 100000,
+    title: 'Langkah Kecil untuk Perubahan Besar',
+    author: 'Budi Santoso',
+    description: 'Buku ini mengajarkan cara membuat perubahan positif dalam hidup dengan langkah-langkah kecil yang konsisten.',
+    coverUrl: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400',
+    price: 0,
     rating: 4.8,
-    reviewsCount: 124,
+    category: 'Pengembangan Diri',
+    pages: Array(20).fill('page'),
     isPopular: true,
     isNew: false,
-    dateAdded: '2026-01-10',
-    coverUrl: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=400&q=80',
-    description: 'Buku panduan praktis filsafat Yunani-Romawi Kuno (Stoikisme) untuk membantu kita mengatasi kekhawatiran dan mengendalikan emosi negatif dalam kehidupan sehari-hari.',
-    pages: [
-      "BAB 1: KECEMASAN MODERN DAN SOLUSI KUNO\n\nSelamat datang di lembaran Filosofi Teras...",
-      "BAB 2: DIKOTOMI KENDALI (TRIK SUPER STOIK)\n\nInilah pilar utama dari Filosofi Teras..."
-    ]
+    dateAdded: '2024-01-15',
+    reviewsCount: 128
   },
   {
     id: 'eb-2',
-    title: 'Belajar React & Next.js Modern',
-    author: 'Rian Wijaya, M.Kom',
-    category: 'Teknologi & Koding',
-    price: 125000,
-    originalPrice: 150000,
+    title: 'Menguasai React dalam 30 Hari',
+    author: 'Siti Nurhaliza',
+    description: 'Panduan lengkap belajar React dari nol hingga mahir dalam waktu 30 hari dengan praktik langsung.',
+    coverUrl: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400',
+    price: 0,
     rating: 4.9,
-    reviewsCount: 86,
+    category: 'Teknologi & Koding',
+    pages: Array(25).fill('page'),
     isPopular: true,
     isNew: true,
-    dateAdded: '2026-05-20',
-    coverUrl: 'https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?auto=format&fit=crop&w=400&q=80',
-    description: 'Panduan terlengkap membangun aplikasi web modern berskala besar menggunakan React 19, Vite, Tailwind CSS, dan Next.js App Router.',
-    pages: [
-      "BAB 1: PENGANTAR REACT MODERN\n\nSelamat datang di era React Modern!",
-      "BAB 2: MEMAHAMI STATE DAN COMPONENT LIFE\n\nState adalah memori dari sebuah component."
-    ]
+    dateAdded: '2024-03-01',
+    reviewsCount: 256
   },
   {
     id: 'eb-3',
-    title: 'Laskar Pelangi',
-    author: 'Andrea Hirata',
+    title: 'Cerita dari Hutan',
+    author: 'Ahmad Dahlan',
+    description: 'Kumpulan cerita pendek yang mengisahkan kehidupan di tengah hutan dan nilai-nilai alam.',
+    coverUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400',
+    price: 0,
+    rating: 4.5,
     category: 'Sastra & Fiksi',
-    price: 79000,
-    rating: 4.7,
-    reviewsCount: 340,
+    pages: Array(15).fill('page'),
     isPopular: false,
     isNew: false,
-    dateAdded: '2025-11-05',
-    coverUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=400&q=80',
-    description: 'Kisah legendaris sepuluh anak Belitong yang berjuang mengejar mimpi dan pendidikan di sebuah sekolah reot SD Muhammadiyah Belitong.',
-    pages: [
-      "BAGIAN 1: SEKOLAH YANG HAMPIR ROBOH\n\nPagi itu, matahari bersinar agak pucat...",
-      "BAGIAN 2: SEPOELOEH LASKAR PELANGI\n\nSejak hari bersejarah itu, Bu Mus menamai kami..."
-    ]
+    dateAdded: '2024-02-10',
+    reviewsCount: 89
   },
   {
     id: 'eb-4',
-    title: 'Manajemen Bisnis Digital 101',
-    author: 'Prof. Dr. Ir. Diana Lestari',
+    title: 'Investasi untuk Pemula',
+    author: 'Rina Wijaya',
+    description: 'Pelajari dasar-dasar investasi saham dan crypto dengan strategi yang aman untuk pemula.',
+    coverUrl: 'https://images.unsplash.com/photo-1553729459-afea5e5f3d3e?w=400',
+    price: 0,
+    rating: 4.7,
     category: 'Bisnis & Finansial',
-    price: 110000,
-    originalPrice: 135000,
+    pages: Array(30).fill('page'),
+    isPopular: true,
+    isNew: false,
+    dateAdded: '2024-01-20',
+    reviewsCount: 312
+  },
+  {
+    id: 'eb-5',
+    title: 'Fisika yang Menyenangkan',
+    author: 'Dr. Andi Pratama',
+    description: 'Pelajari konsep fisika dasar dengan pendekatan yang mudah dipahami dan contoh aplikasi nyata.',
+    coverUrl: 'https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?w=400',
+    price: 0,
     rating: 4.6,
-    reviewsCount: 42,
+    category: 'Edukasi & Sains',
+    pages: Array(22).fill('page'),
     isPopular: false,
     isNew: true,
-    dateAdded: '2026-03-15',
-    coverUrl: 'https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&w=400&q=80',
-    description: 'Buku komprehensif bagi wirausahawan, manajer, dan mahasiswa bisnis untuk memahami peta ekosistem e-commerce dan transformasi digital.',
-    pages: [
-      "BAB 1: ERA DISRUPSI DIGITAL\n\nSelamat datang di panduan Bisnis Digital 101...",
-      "BAB 2: METODE LEAN STARTUP\n\nMetode Lean Startup yang dipopulerkan oleh Eric Ries..."
-    ]
+    dateAdded: '2024-03-15',
+    reviewsCount: 145
+  },
+  {
+    id: 'eb-6',
+    title: 'Resep Masakan Rumahan',
+    author: 'Chef Maria',
+    description: 'Kumpulan resep masakan rumahan yang mudah dibuat dengan bahan-bahan yang mudah ditemukan.',
+    coverUrl: 'https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=400',
+    price: 0,
+    rating: 4.8,
+    category: 'Culinary & Hobi',
+    pages: Array(18).fill('page'),
+    isPopular: true,
+    isNew: false,
+    dateAdded: '2024-02-01',
+    reviewsCount: 198
+  },
+  {
+    id: 'eb-7',
+    title: 'Mindset untuk Sukses',
+    author: 'John Carter',
+    description: 'Bagaimana membangun mindset yang tepat untuk mencapai kesuksesan dalam bisnis dan kehidupan.',
+    coverUrl: 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400',
+    price: 0,
+    rating: 4.4,
+    category: 'Pengembangan Diri',
+    pages: Array(16).fill('page'),
+    isPopular: false,
+    isNew: true,
+    dateAdded: '2024-03-10',
+    reviewsCount: 76
+  },
+  {
+    id: 'eb-8',
+    title: 'Python untuk Data Science',
+    author: 'Lisa Chen',
+    description: 'Panduan praktis menggunakan Python untuk analisis data dan machine learning.',
+    coverUrl: 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=400',
+    price: 0,
+    rating: 4.9,
+    category: 'Teknologi & Koding',
+    pages: Array(35).fill('page'),
+    isPopular: true,
+    isNew: true,
+    dateAdded: '2024-03-20',
+    reviewsCount: 421
   }
 ];
 
-export const INITIAL_ARTICLES: Article[] = [
-  {
-    id: 'art-1',
-    title: '5 Cara Membangun Konsistensi Membaca Buku Setiap Hari',
-    summary: 'Menemukan waktu di tengah kesibukan harian memang menantang, namun dengan teknik mikro-kebiasaan, membaca 15 halaman sehari bisa menjadi hal mudah.',
-    content: 'Isi lengkap artikel tentang konsistensi membaca...',
-    category: 'Tips & Trik',
-    date: '12 Juni 2026',
-    coverUrl: 'https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?auto=format&fit=crop&w=400&q=80',
-    readTime: '5 min read',
-    author: 'Admin e.mind',
-    authorAvatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80'
-  }
-];
+export const INITIAL_ARTICLES: Article[] = [];
 
-// Ditambahkan untuk memenuhi kebutuhan import di App.tsx
-export const INITIAL_REVIEWS: Review[] = [
-  {
-    id: 'rev-1',
-    ebookId: 'eb-1',
-    userId: 'u-2',
-    username: 'Budi Santoso',
-    rating: 5,
-    comment: 'Buku yang sangat bagus dan membuka wawasan baru!',
-    date: '2026-06-15'
-  }
-];
+export const INITIAL_REVIEWS: Review[] = [];

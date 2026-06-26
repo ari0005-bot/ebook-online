@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Ebook, User, Review, Transaction, Article } from './types';
 import { 
-  INITIAL_EBOOKS, INITIAL_ARTICLES, INITIAL_TESTIMONIALS, INITIAL_REVIEWS, EBOOK_CATEGORIES 
+  INITIAL_EBOOKS, INITIAL_ARTICLES, INITIAL_REVIEWS, EBOOK_CATEGORIES 
 } from './data';
 
 // Import subcomponents
@@ -17,6 +17,9 @@ import Auth from './components/Auth';
 import PresentationEnd from './components/PresentationEnd';
 import UserDashboard from './components/UserDashboard';
 import LandingPage from './components/LandingPage';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+import SplashScreen from './components/SplashScreen';
 
 import { 
   BookOpen, ShoppingCart, User as UserIcon, LogOut, Laptop, Sparkles, 
@@ -44,12 +47,8 @@ export default function App() {
   // Authentication modal toggle
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  // Ensure users see landing page first on initial visit
-  const [hasSeenLanding, setHasSeenLanding] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem('has_seen_landing') === '1';
-    } catch (e) { return false; }
-  });
+  const [hasSeenLanding, setHasSeenLanding] = useState<boolean>(false);
+  const [showSplash, setShowSplash] = useState<boolean>(true);
 
   // Selected article detail modal state
   const [activeArticle, setActiveArticle] = useState<Article | null>(null);
@@ -57,9 +56,6 @@ export default function App() {
   // Alert popup states
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState<'info' | 'success'>('info');
-
-  // ===== TAMBAHAN SPLASH SCREEN STATE =====
-  const [showSplash, setShowSplash] = useState(true);
 
   // Trigger temporary floating Toast alerts
   const showToast = (msg: string, type: 'info' | 'success' = 'info') => {
@@ -80,42 +76,20 @@ export default function App() {
     }
   };
 
-  // INITAL DATA BOOTSTRAPPING FLOW
+  // INITIAL DATA BOOTSTRAPPING FLOW
   useEffect(() => {
     // 1. Fetch Ebooks
-    const savedBooks = readStoredJSON<Ebook[]>('app_ebooks', INITIAL_EBOOKS);
+    const savedBooks = readStoredJSON<Ebook[]>('app_ebooks', []);
     setEbooks(savedBooks);
     localStorage.setItem('app_ebooks', JSON.stringify(savedBooks));
 
     // 2. Fetch Users Directory
-    const defaultUsersList: User[] = [
-      {
-        id: 'usr-admin',
-        email: 'admin@example.com',
-        username: 'admin_ebook',
-        fullName: 'Admin Utama LuminaBook',
-        role: 'admin',
-        verified: true,
-        avatar: 'https://images.unsplash.com/photo-1570295999915-56ceb5ecca61?auto=format&fit=crop&q=80&w=150',
-        balance: 1000000
-      },
-      {
-        id: 'usr-customer',
-        email: 'budi@example.com',
-        username: 'budi_hartono',
-        fullName: 'Budi Hartono',
-        role: 'user',
-        verified: true,
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150',
-        balance: 250000
-      }
-    ];
-    const savedUsers = readStoredJSON<User[]>('app_users', defaultUsersList);
+    const savedUsers = readStoredJSON<User[]>('app_users', []);
     setUsers(savedUsers);
     localStorage.setItem('app_users', JSON.stringify(savedUsers));
 
     // 3. Fetch Reviews
-    const savedReviews = readStoredJSON<Review[]>('app_reviews', INITIAL_REVIEWS);
+    const savedReviews = readStoredJSON<Review[]>('app_reviews', []);
     setReviews(savedReviews);
     localStorage.setItem('app_reviews', JSON.stringify(savedReviews));
 
@@ -126,28 +100,19 @@ export default function App() {
 
     // 5. Fetch Active User login token
     const storedUser = readStoredJSON<User | null>('current_user', null);
-    
-   if (storedUser) {
-  try {
-    const parsedUser = JSON.parse(storedUser);
-    setCurrentUser(parsedUser);
-  } catch (error) {
-    console.error(error);
-  }
-}
+    if (storedUser) {
+      setCurrentUser(storedUser);
+    }
 
-    // ===== TAMBAHAN SPLASH SCREEN TIMEOUT =====
-    // Splash screen akan menutup setelah 2.5 detik ketika bootstrapping data selesai
-    const splashTimer = setTimeout(() => {
-      setShowSplash(false);
-    }, 2500);
-
-    return () => clearTimeout(splashTimer);
+    return () => {};
   }, []);
 
   const markSeenLanding = () => {
-    try { localStorage.setItem('has_seen_landing', '1'); } catch(e) {}
     setHasSeenLanding(true);
+  };
+
+  const handleSplashComplete = () => {
+    setShowSplash(false);
   };
 
   const saveEbooksState = (newList: Ebook[]) => {
@@ -167,8 +132,8 @@ export default function App() {
 
   // Fetch cart details & items owned by logged-in user
   const ownedBookIds = currentUser
-    ? readStoredJSON<string[]>(`owned_ebooks_${currentUser.id}`, ['eb-5'])
-    : ['eb-5'];
+    ? readStoredJSON<string[]>(`owned_ebooks_${currentUser.id}`, [])
+    : [];
 
   const handleLogout = () => {
     localStorage.removeItem('current_user');
@@ -178,9 +143,10 @@ export default function App() {
     showToast('Berhasil keluar dari sesi akun. Sampai jumpa kembali!', 'info');
   };
 
-  // HANDLER LOGIN DENGAN REDIRECT AUTOMATIS BERDASARKAN ROLE
+  // HANDLER LOGIN DENGAN REDIRECT OTOMATIS BERDASARKAN ROLE
   const handleLoginSuccess = (userPayload: User) => {
     setCurrentUser(userPayload);
+    localStorage.setItem('current_user', JSON.stringify(userPayload));
     setShowAuthModal(false);
     
     const userExistCheck = users.some(u => u.id === userPayload.id || u.email === userPayload.email);
@@ -201,11 +167,6 @@ export default function App() {
 
   const handleAddToCart = (book: Ebook) => {
     if (!currentUser) {
-      if (!hasSeenLanding) {
-        setActivePage('home');
-        showToast('Silakan lihat halaman landing terlebih dahulu sebelum melakukan transaksi.', 'info');
-        return;
-      }
       setShowAuthModal(true);
       showToast('Harap masuk/registrasi terlebih dahulu untuk bertransaksi.', 'info');
       return;
@@ -217,6 +178,61 @@ export default function App() {
     } else {
       setCartIds(prev => [...prev, book.id]);
       showToast(`'${book.title}' ditambahkan ke keranjang belanja.`, 'success');
+    }
+  };
+
+  const handleDirectBuy = (book: Ebook) => {
+    if (!currentUser) {
+      setShowAuthModal(true);
+      showToast('Harap masuk/registrasi terlebih dahulu untuk membeli buku.', 'info');
+      return;
+    }
+
+    if (book.price === 0) {
+      // Free book - add directly to library
+      const oldLibrary = readStoredJSON<string[]>(`owned_ebooks_${currentUser.id}`, []);
+      if (!oldLibrary.includes(book.id)) {
+        const newLibrary = [...oldLibrary, book.id];
+        localStorage.setItem(`owned_ebooks_${currentUser.id}`, JSON.stringify(newLibrary));
+        showToast(`'${book.title}' berhasil ditambahkan ke pustaka Anda!`, 'success');
+      } else {
+        showToast(`'${book.title}' sudah ada di pustaka Anda.`, 'info');
+      }
+    } else {
+      // Paid book - direct checkout
+      if (currentUser.balance < book.price) {
+        showToast('Saldo tidak cukup. Silakan topup terlebih dahulu.', 'info');
+        return;
+      }
+
+      const newBalance = currentUser.balance - book.price;
+      const updatedUser = { ...currentUser, balance: newBalance };
+      setCurrentUser(updatedUser);
+      localStorage.setItem('current_user', JSON.stringify(updatedUser));
+
+      const oldLibrary = readStoredJSON<string[]>(`owned_ebooks_${currentUser.id}`, []);
+      const newLibrary = [...oldLibrary, book.id];
+      localStorage.setItem(`owned_ebooks_${currentUser.id}`, JSON.stringify(newLibrary));
+
+      const txRecord: Transaction = {
+        id: 'tx-' + Date.now(),
+        userId: currentUser.id,
+        ebookIds: [book.id],
+        totalAmount: book.price,
+        paymentMethod: 'Saldo Digital',
+        status: 'success',
+        date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+        invoiceNumber: 'INV-' + Date.now()
+      };
+
+      const updatedTx = [txRecord, ...transactions];
+      setTransactions(updatedTx);
+      localStorage.setItem('app_transactions', JSON.stringify(updatedTx));
+
+      const revisedUsers = users.map(u => u.id === currentUser.id ? updatedUser : u);
+      saveUsersState(revisedUsers);
+
+      showToast(`Pembelian berhasil! '${book.title}' siap dibaca.`, 'success');
     }
   };
 
@@ -259,7 +275,7 @@ export default function App() {
     const revisedUsers = users.map(u => u.id === currentUser.id ? revisedCurrentUser : u);
     saveUsersState(revisedUsers);
 
-    showToast(`Topup berhasil! Saldo digital bertambah ${amount.toLocaleString('id-ID')}`, 'success');
+    showToast(`Topup berhasil! Saldo digital bertambah Rp ${amount.toLocaleString('id-ID')}`, 'success');
   };
 
   const handleAddReview = (newReviewFields: Omit<Review, 'id' | 'date'>) => {
@@ -337,7 +353,7 @@ export default function App() {
       return u;
     });
     saveUsersState(updated);
-    showToast(`Kredit balance user disuntik ${amount.toLocaleString('id-ID')}`, 'success');
+    showToast(`Kredit balance user disuntik Rp ${amount.toLocaleString('id-ID')}`, 'success');
   };
 
   const popularEbooks = ebooks.filter(eb => eb.isPopular).slice(0, 4);
@@ -345,63 +361,11 @@ export default function App() {
   return (
     <div className="app-shell min-h-screen flex flex-col font-sans select-none pb-12">
       
-      {/* ===== 1. COMPONENT SPLASH SCREEN (MENGGUNAKAN ANIMATEPRESENCE) ===== */}
-      <AnimatePresence>
-        {showSplash && (
-          <motion.div
-            key="splash-screen"
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, ease: 'easeInOut' }}
-            className="fixed inset-0 bg-slate-950 flex flex-col justify-center items-center z-[99999]"
-          >
-            <div className="text-center space-y-6">
-              {/* Logo Box Animasi */}
-              <motion.div
-                animate={{ 
-                  scale: [1, 1.05, 1],
-                  opacity: [0.8, 1, 0.8]
-                }}
-                transition={{ 
-                  duration: 2, 
-                  repeat: Infinity, 
-                  ease: "easeInOut" 
-                }}
-                className="w-20 h-20 bg-gradient-to-tr from-[#c8963e] to-[#ab7f30] rounded-3xl flex items-center justify-center mx-auto shadow-xl shadow-amber-500/10"
-              >
-                <Sparkles className="w-10 h-10 text-white" />
-              </motion.div>
 
-              {/* Judul Branding Website */}
-              <div className="space-y-1">
-                <h1 className="text-3xl font-black tracking-wider text-white font-serif">
-                  e.mind
-                </h1>
-                <p className="text-[10px] text-slate-400 uppercase tracking-[0.2em] font-bold">
-                  The LOCAL Enablers
-                </p>
-              </div>
+      {/* SPLASH SCREEN */}
+      {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
 
-              {/* Loader Loading Linear */}
-              <div className="w-32 h-[3px] bg-slate-900 rounded-full mx-auto overflow-hidden relative">
-                <motion.div 
-                  className="h-full bg-gradient-to-r from-[#c8963e] to-[#ab7f30] rounded-full absolute left-0 top-0"
-                  animate={{ 
-                    width: ["0%", "100%"],
-                    left: ["0%", "0%"]
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                />
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
+      {/* TOAST ALERTS */}
       <AnimatePresence>
         {toastMessage && (
           <motion.div 
@@ -418,149 +382,19 @@ export default function App() {
       </AnimatePresence>
 
       {/* PERSISTENT HEADER BAR */}
-      <header className="sticky top-0 z-40 bg-white shadow-md border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between gap-4 py-2">
-          
-          <div 
-            onClick={() => { 
-              if (!currentUser || currentUser.role !== 'admin') {
-                setActivePage('home'); 
-                setSelectedEbook(null); 
-              }
-            }}
-            className="flex items-center gap-2 cursor-pointer hover:opacity-90 transition-opacity"
-          >
-            <img 
-              src="/assets/branding-logo.png" 
-              alt="The LOCAL Enablers - e.mind" 
-              className="h-20 w-auto object-contain scale-125"
-            />
-          </div>
-
-          {/* DYNAMIC CENTER NAVIGATION BERDASARKAN STATUS LOGIN & ROLE */}
-          <nav className="hidden lg:flex items-center gap-0.5 text-xs font-bold text-slate-600 uppercase tracking-wider">
-            
-            {/* TAMPILAN GUEST ATAU USER BIASA */}
-            {(!currentUser || currentUser.role !== 'admin') && (
-              <>
-                <button
-                  onClick={() => { setActivePage('home'); setSelectedEbook(null); }}
-                  className={`px-3 py-2 rounded-lg transition-all ${activePage === 'home' ? 'bg-primary-100 text-primary-700 font-bold' : 'text-slate-600 hover:text-primary-600 hover:bg-slate-100'}`}
-                >
-                  Beranda
-                </button>
-                <button
-                  onClick={() => { setActivePage('catalog'); setSelectedEbook(null); }}
-                  className={`px-3 py-2 rounded-lg transition-all ${activePage === 'catalog' ? 'bg-primary-100 text-primary-700 font-bold' : 'text-slate-600 hover:text-primary-600 hover:bg-slate-100'}`}
-                >
-                  Katalog
-                </button>
-              </>
-            )}
-
-            {/* DASHBOARD USER (Hanya Tampil Jika Sudah Login Sebagai User) */}
-            {currentUser && currentUser.role === 'user' && (
-              <button
-                onClick={() => { setActivePage('dashboard'); setSelectedEbook(null); }}
-                className={`px-3 py-2 rounded-lg transition-all ${activePage === 'dashboard' ? 'bg-primary-100 text-primary-700 font-bold' : 'text-slate-600 hover:text-primary-600 hover:bg-slate-100'}`}
-              >
-                Dashboard
-              </button>
-            )}
-
-            {/* DASHBOARD ADMIN (Hanya Tampil Jika Login Sebagai Admin) */}
-            {currentUser && currentUser.role === 'admin' && (
-              <button
-                onClick={() => { setActivePage('admin'); setSelectedEbook(null); }}
-                className={`px-3 py-2 rounded-lg transition-all ${activePage === 'admin' ? 'bg-pink-100 text-pink-700 font-bold' : 'text-slate-600 hover:text-pink-600 hover:bg-slate-100'}`}
-              >
-                Dashboard Admin
-              </button>
-            )}
-
-            {(!currentUser || currentUser.role !== 'admin') && (
-              <button 
-                onClick={() => { setActivePage('presentation'); setSelectedEbook(null); }}
-                className={`px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 ${activePage === 'presentation' ? 'bg-pink-100 text-pink-700 font-bold' : 'text-slate-600 hover:text-pink-600 hover:bg-slate-100'}`}
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>FAQ</span>
-              </button>
-            )}
-          </nav>
-
-          {/* Right Actions */}
-          <div className="flex items-center gap-2 lg:gap-3">
-            {(!currentUser || currentUser.role !== 'admin') && (
-              <button
-                onClick={() => { setActivePage('cart'); setSelectedEbook(null); }}
-                className="p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all cursor-pointer relative"
-              >
-                <ShoppingCart className="w-4 h-4" />
-                {cartIds.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-primary-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold shadow-md">
-                    {cartIds.length}
-                  </span>
-                )}
-              </button>
-            )}
-
-            {currentUser ? (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => { 
-                    if (currentUser.role === 'admin') {
-                      setActivePage('admin');
-                    } else {
-                      setActivePage('profile');
-                    }
-                    setSelectedEbook(null); 
-                  }}
-                  className="w-8 h-8 rounded-lg overflow-hidden border-2 border-slate-300 hover:border-primary-500 transition-all hover:scale-105 cursor-pointer"
-                >
-                  <img src={currentUser.avatar} alt={currentUser.username} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all cursor-pointer"
-                  title="Logout"
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => { !hasSeenLanding && setActivePage('home'); setShowAuthModal(true); }}
-                className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-xs font-bold transition-all shadow-md cursor-pointer"
-              >
-                Masuk
-              </button>
-            )}
-          </div>
-        </div>
-      </header>
+      <Navbar
+        currentUser={currentUser}
+        cartIds={cartIds}
+        activePage={activePage}
+        setActivePage={setActivePage}
+        setSelectedEbook={setSelectedEbook}
+        setShowAuthModal={setShowAuthModal}
+        handleLogout={handleLogout}
+      />
 
       {/* MAIN SCREEN ROUTER */}
       <main className="flex-grow">
 
-        {!hasSeenLanding && (
-          <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="w-full max-w-2xl bg-white rounded-3xl p-8 text-center shadow-lift">
-              <h2 className="text-2xl font-extrabold text-slate-900 mb-3">Selamat datang di PustakaEbook</h2>
-              <p className="text-sm text-slate-600 mb-6">Silakan lihat halaman landing terlebih dahulu untuk mengenal layanan kami. Anda dapat login setelah menutup pengantar ini.</p>
-              <div className="flex justify-center gap-3">
-                <button
-                  onClick={() => { markSeenLanding(); setActivePage('home'); }}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold shadow-xs hover:bg-blue-700 transition-all"
-                >Lanjutkan ke Landing</button>
-                <button
-                  onClick={() => { markSeenLanding(); setActivePage('catalog'); }}
-                  className="px-6 py-3 bg-slate-100 text-slate-800 rounded-xl font-bold shadow-xs hover:bg-slate-200 transition-all"
-                >Jelajahi tanpa Login</button>
-              </div>
-            </div>
-          </div>
-        )}
         
         <AnimatePresence mode="wait">
           {activePage === 'home' && (
@@ -586,6 +420,7 @@ export default function App() {
                 onSelectEbook={(eb) => { setSelectedEbook(eb); setActivePage('detail'); }}
                 onAddToCart={handleAddToCart}
                 onReadEbook={(eb) => setActiveReadingBook(eb)}
+                onDirectBuy={handleDirectBuy}
               />
             </motion.div>
           )}
@@ -600,9 +435,11 @@ export default function App() {
                 cartBookIds={cartIds}
                 reviews={reviews}
                 onBack={() => { setActivePage('catalog'); setSelectedEbook(null); }}
+                onSelectEbook={(eb) => { setSelectedEbook(eb); }}
                 onAddToCart={handleAddToCart}
                 onReadEbook={(eb) => setActiveReadingBook(eb)}
                 onAddReview={handleAddReview}
+                onDirectBuy={handleDirectBuy}
               />
             </motion.div>
           )}
@@ -632,7 +469,6 @@ export default function App() {
                   const nextUsersList = users.map(u => u.id === updated.id ? updated : u);
                   saveUsersState(nextUsersList);
                 }}
-                onTopUp={handleWalletTopUp}
               />
             </motion.div>
           )}
@@ -648,12 +484,11 @@ export default function App() {
                   ownedBookIds={ownedBookIds}
                   onNavigateToCatalog={() => setActivePage('catalog')}
                   onReadEbook={(eb) => setActiveReadingBook(eb)}
-                  onTopUp={handleWalletTopUp}
                 />
               ) : (
                 <div className="max-w-md mx-auto text-center py-20 px-4">
                   <p className="text-slate-500 mb-4">Silakan masuk menggunakan akun User untuk mengakses dashboard Anda.</p>
-                  <button onClick={() => setShowAuthModal(true)} className="px-5 py-2 bg-primary-600 text-white rounded-xl font-bold shadow-md hover:bg-primary-700 transition-all">
+                  <button onClick={() => setShowAuthModal(true)} className="px-5 py-2 bg-[#c8963e] text-white rounded-xl font-bold shadow-md hover:bg-[#ab7f30] transition-all">
                     Masuk Sekarang
                   </button>
                 </div>
@@ -693,103 +528,26 @@ export default function App() {
         </AnimatePresence>
       </main>
 
-      {/* SINKRONISASI DEMO TOGGLER UNTUK KEPENTINGAN DEMO/TESTING */}
-      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-55 bg-slate-900 text-white rounded-full px-4 py-2 flex items-center gap-3 shadow-lg border border-slate-800 text-[10px] md:text-xs">
-        <span className="text-amber-400 font-bold shrink-0 hidden sm:inline">⚡ DEMO TOGGLER:</span>
-        <button
-          onClick={() => {
-            localStorage.removeItem('current_user');
-            setCurrentUser(null);
-            setCartIds([]);
-            setActivePage('home');
-            showToast('Beralih sebagai Pengunjung (Guest)', 'info');
-          }}
-          className={`px-3 py-1 rounded-full cursor-pointer font-bold ${currentUser === null ? 'bg-blue-600 text-white' : 'hover:bg-slate-850 text-slate-400'}`}
-        >
-          Guest
-        </button>
-        <button
-          onClick={() => {
-            const budi: User = {
-              id: 'usr-customer',
-              email: 'budi@example.com',
-              username: 'budi_hartono',
-              fullName: 'Budi Hartono',
-              role: 'user',
-              verified: true,
-              avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=150',
-              balance: 250000
-            };
-            localStorage.setItem('current_user', JSON.stringify(budi));
-            setCurrentUser(budi);
-            setCartIds([]);
-            setActivePage('dashboard'); // Otomatis ke dashboard user
-            showToast('Sesi User Budi Hartono diaktifkan.', 'success');
-          }}
-          className={`px-3 py-1 rounded-full cursor-pointer font-bold ${currentUser?.id === 'usr-customer' ? 'bg-blue-600 text-white' : 'hover:bg-slate-850 text-slate-400'}`}
-        >
-          Budi (User)
-        </button>
-        <button
-          onClick={() => {
-            const adm: User = {
-              id: 'usr-admin',
-              email: 'admin@example.com',
-              username: 'admin_ebook',
-              fullName: 'Admin Utama LuminaBook',
-              role: 'admin',
-              verified: true,
-              avatar: 'https://images.unsplash.com/photo-1570295999915-56ceb5ecca61?auto=format&fit=crop&q=80&w=150',
-              balance: 1000000
-            };
-            localStorage.setItem('current_user', JSON.stringify(adm));
-            setCurrentUser(adm);
-            setCartIds([]);
-            setActivePage('admin'); // Otomatis langsung masuk dashboard admin
-            showToast('Sesi Admin Utama Aktif!', 'success');
-          }}
-          className={`px-3 py-1 rounded-full cursor-pointer font-bold ${currentUser?.id === 'usr-admin' ? 'bg-blue-600 text-white' : 'hover:bg-slate-850 text-slate-400'}`}
-        >
-          Admin
-        </button>
-      </div>
-
-      <footer className="max-w-7xl mx-auto px-4 pt-16 mt-8 border-t border-slate-205 text-center text-xs text-slate-455">
-        <p className="font-semibold text-slate-650">Sistem Website Ebook Online © 2026</p>
-        <p className="mt-1">Dibuat dengan dedikasi kepatuhan penuh atas spesifikasi 10 Modul Interaktif bagi Ebook online premium.</p>
-      </footer>
-
-      {activeReadingBook && (
-        <Reader
-          ebook={activeReadingBook}
-          currentUser={currentUser}
-          onClose={() => setActiveReadingBook(null)}
+      {/* AUTH MODAL CONDITIONAL RENDERING */}
+      {showAuthModal && (
+        <Auth 
+          onClose={() => setShowAuthModal(false)} 
+          onLoginSuccess={handleLoginSuccess}
         />
       )}
 
-      {showAuthModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="relative w-full max-w-md">
-            <button onClick={() => setShowAuthModal(false)} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 cursor-pointer z-10">
-              <X className="w-5 h-5" />
-            </button>
-            <Auth onLoginSuccess={handleLoginSuccess} onClose={() => setShowAuthModal(false)} />
-          </div>
-        </div>
+      {/* READER OVERLAY INSTANCE */}
+      {activeReadingBook && (
+        <Reader 
+          ebook={activeReadingBook} 
+          currentUser={currentUser}
+          onClose={() => setActiveReadingBook(null)} 
+        />
       )}
 
-      {activeArticle && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-2xl bg-white rounded-3xl overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh]">
-            <button onClick={() => setActiveArticle(null)} className="absolute top-4 right-4 p-2 bg-black/50 text-white hover:bg-black/75 rounded-full cursor-pointer z-10">
-              <X className="w-4 h-4" />
-            </button>
-            <div className="h-56 bg-slate-100 overflow-hidden relative">
-              <img src={activeArticle.coverUrl} alt={activeArticle.title} className="w-full h-full object-cover" />
-            </div>
-          </motion.div>
-        </div>
-      )}
+
+      {/* FOOTER BAR */}
+      <Footer />
     </div>
   );
 }

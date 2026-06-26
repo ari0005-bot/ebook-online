@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
 import { Ebook, User, Transaction } from '../types';
 import { ShoppingBag, Trash2, CreditCard, ChevronRight, CheckCircle, ShieldCheck, AlertCircle, Sparkles, RefreshCw } from 'lucide-react';
 
@@ -22,6 +23,12 @@ export default function CartCheckout({
   const [step, setStep] = useState<'cart' | 'payment' | 'completed'>('cart');
   const [paymentMethod, setPaymentMethod] = useState<'qris' | 'va' | 'card'>('qris');
   
+  // Input voucher (Fitur Baru Terintegrasi Backend)
+  const [voucherCode, setVoucherCode] = useState('');
+  const [discount, setDiscount] = useState(0);
+  const [voucherApplied, setVoucherApplied] = useState(false);
+  const [voucherSuccessMsg, setVoucherSuccessMsg] = useState('');
+
   // Credit card details
   const [cardNumber, setCardNumber] = useState('');
   const [cardHolder, setCardHolder] = useState('');
@@ -30,15 +37,44 @@ export default function CartCheckout({
   
   const [paying, setPaying] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [recentTransaction, setRecentTransaction] = useState<Transaction | null>(null);
+  const [recentTransaction, setRecentTransaction] = useState<any>(null);
 
-  // Bill computations
+  // Perhitungan Harga Dasar
   const subtotal = cartItems.reduce((sum, item) => sum + item.price, 0);
   const tax = Math.round(subtotal * 0.11); // PPN 11%
-  const platformFee = subtotal > 0 ? 2500 : 0; // standard platform contribution
-  const grandTotal = subtotal + tax + platformFee;
+  const platformFee = subtotal > 0 ? 2500 : 0; 
+  
+  // Total akumulasi sebelum potongan kupon
+  const totalBeforeDiscount = subtotal + tax + platformFee;
+  // Total akhir setelah dikurangi diskon voucher dari backend
+  const grandTotal = totalBeforeDiscount - discount < 0 ? 0 : totalBeforeDiscount - discount;
 
-  const handlePay = () => {
+  // Fungsi Mengecek & Menerapkan Voucher langsung ke Backend MySQL
+  const handleApplyVoucher = async () => {
+    setErrorMsg('');
+    setVoucherSuccessMsg('');
+    if (!voucherCode.trim()) return;
+
+    try {
+      const response = await axios.post('http://localhost:5000/api/vouchers/apply', {
+        code: voucherCode.toUpperCase(),
+        totalPrice: totalBeforeDiscount
+      });
+
+      if (response.data.success) {
+        setDiscount(response.data.data.discount);
+        setVoucherApplied(true);
+        setVoucherSuccessMsg(`Berhasil! ${response.data.message} (Potongan: Rp ${response.data.data.discount.toLocaleString('id-ID')})`);
+      }
+    } catch (err: any) {
+      setDiscount(0);
+      setVoucherApplied(false);
+      setErrorMsg(err.response?.data?.message || 'Kode voucher tidak valid atau sudah habis.');
+    }
+  };
+
+  // Fungsi Eksekusi Pembayaran Riil Terintegrasi Backend
+  const handlePay = async () => {
     setErrorMsg('');
     if (!currentUser) {
       setErrorMsg('Anda harus masuk terlebih dahulu untuk melakukan checkout.');
@@ -46,42 +82,64 @@ export default function CartCheckout({
     }
 
     if (currentUser.balance < grandTotal) {
-      setErrorMsg('Saldo virtual Anda tidak jenuh. Silakan klik tombol "Isi Saldo Rp100.000 Gratis" untuk menambah saldo!');
+      setErrorMsg('Saldo virtual Anda tidak mencukupi. Silakan lakukan pengisian saldo terlebih dahulu.');
       return;
     }
 
-    // Fill in mock forms
     if (paymentMethod === 'card' && (!cardNumber || !cardHolder)) {
       setErrorMsg('Lengkapi detail nomor dan pemegang kartu kredit Anda.');
       return;
     }
 
     setPaying(true);
-    
-    setTimeout(() => {
-      const invoiceNo = `INV/${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}/EBOOK/${Math.floor(1000 + Math.random() * 9000)}`;
-      const newBalance = currentUser.balance - grandTotal;
 
-      const record: Transaction = {
-        id: 'tx-' + Math.random().toString(36).substring(2, 9),
+    try {
+      // LANGKAH 1: Buat transaksi pending di backend
+      const checkoutResponse = await axios.post('http://localhost:5000/api/transactions/checkout', {
         userId: currentUser.id,
-        ebookIds: cartItems.map(item => item.id),
-        totalAmount: grandTotal,
-        paymentMethod: paymentMethod === 'qris' 
-          ? 'QRIS Mandiri Standar' 
-          : paymentMethod === 'va' 
-            ? 'Virtual Account BCA' 
-            : 'Debit/Credit Card Online',
-        status: 'success',
-        date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-        invoiceNumber: invoiceNo
-      };
+        durationMonths: 1, // Default untuk pembelian buku / 1 bulan modul
+        originalPrice: totalBeforeDiscount,
+        voucherCode: voucherApplied ? voucherCode.toUpperCase() : null
+      });
 
-      setRecentTransaction(record);
-      onCheckoutSuccess(cartItems.map(item => item.id), record, newBalance);
+      if (checkoutResponse.data.success) {
+        const transactionId = checkoutResponse.data.data.id;
+
+        // LANGKAH 2: Konfirmasi pelunasan pembayaran ke backend
+        const paymentResponse = await axios.post('http://localhost:5000/api/transactions/payment-success', {
+          transactionId: transactionId
+        });
+
+        if (paymentResponse.data.success) {
+          // Siapkan record transaksi final untuk ditampilkan pada invoice screen
+          const record: Transaction = {
+            id: transactionId.toString(),
+            userId: currentUser.id,
+            ebookIds: cartItems.map(item => item.id),
+            totalAmount: grandTotal,
+            paymentMethod: paymentMethod === 'qris' 
+              ? 'QRIS Mandiri Standar' 
+              : paymentMethod === 'va' 
+                ? 'Virtual Account BCA' 
+                : 'Debit/Credit Card Online',
+            status: 'success',
+            date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+            invoiceNumber: `INV/${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}/EMIND/${Math.floor(1000 + Math.random() * 9000)}`
+          };
+
+          const calculatedNewBalance = currentUser.balance - grandTotal;
+
+          setRecentTransaction(record);
+          // Callback ke state global React root agar hak akses premium/buku terbuka
+          onCheckoutSuccess(cartItems.map(item => item.id), record, calculatedNewBalance);
+          setStep('completed');
+        }
+      }
+    } catch (err: any) {
+      setErrorMsg(err.response?.data?.message || 'Terjadi kesalahan sistem saat memproses pembayaran.');
+    } finally {
       setPaying(false);
-      setStep('completed');
-    }, 1500);
+    }
   };
 
   const formatIDR = (num: number) => {
@@ -91,7 +149,7 @@ export default function CartCheckout({
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      {/* Checkout step progress flow badges */}
+      {/* Checkout Step Progress Flow Badges */}
       <div className="flex justify-center items-center gap-4 md:gap-8 mb-10 overflow-x-auto py-2">
         <button 
           onClick={() => step === 'payment' && setStep('cart')}
@@ -113,7 +171,7 @@ export default function CartCheckout({
         </div>
       </div>
 
-      {/* ERROR MSG ALERTS */}
+      {/* Error Message Alerts */}
       {errorMsg && (
         <div className="mb-6 p-4 bg-rose-50 border border-rose-200 text-xs md:text-sm text-rose-800 rounded-2xl flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
@@ -132,11 +190,19 @@ export default function CartCheckout({
         </div>
       )}
 
+      {/* Voucher Success Message Feedback */}
+      {voucherSuccessMsg && (
+        <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center gap-2 text-xs text-emerald-800">
+          <CheckCircle className="w-4 h-4 text-emerald-600" />
+          <p>{voucherSuccessMsg}</p>
+        </div>
+      )}
+
       {/* CASE 1: CART STEP SCREEN */}
       {step === 'cart' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* Cart items list (2 columns) */}
+          {/* Cart Items List */}
           <div className="lg:col-span-2 space-y-4">
             <h3 className="text-xl font-bold text-slate-800 mb-2">Item Belanja ({cartItems.length})</h3>
             
@@ -183,7 +249,7 @@ export default function CartCheckout({
             )}
           </div>
 
-          {/* Pricing detailed summary block */}
+          {/* Pricing Detailed Summary Block */}
           <div className="lg:col-span-1">
             <div className="glass-panel p-6 rounded-3xl space-y-4 sticky top-6">
               <h4 className="text-sm font-bold uppercase tracking-wider text-slate-400">Ringkasan Pesanan</h4>
@@ -201,7 +267,38 @@ export default function CartCheckout({
                   <span>Biaya Layanan Admin</span>
                   <span className="font-mono">{formatIDR(platformFee)}</span>
                 </div>
+                {discount > 0 && (
+                  <div className="flex justify-between text-emerald-600 font-semibold">
+                    <span>Diskon Kupon</span>
+                    <span className="font-mono">-{formatIDR(discount)}</span>
+                  </div>
+                )}
               </div>
+
+              {/* INPUT VOUCHER FIELD COMPONENT */}
+              {cartItems.length > 0 && (
+                <div className="pt-1 pb-2">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide block mb-1">Gunakan Paket Voucher</label>
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      value={voucherCode}
+                      onChange={(e) => setVoucherCode(e.target.value)}
+                      placeholder="CONTOH: EDUHUBLITE"
+                      disabled={voucherApplied}
+                      className="flex-1 bg-white outline-none border border-slate-200 focus:border-blue-500 disabled:bg-slate-100 uppercase font-mono rounded-xl px-3 py-2 text-xs"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyVoucher}
+                      disabled={voucherApplied || !voucherCode}
+                      className="px-3 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 disabled:opacity-40 cursor-pointer"
+                    >
+                      Klaim
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <div className="flex justify-between items-center text-slate-800">
                 <span className="text-sm font-bold">Total Pembayaran</span>
@@ -210,7 +307,6 @@ export default function CartCheckout({
                 </span>
               </div>
 
-              {/* Virtual check of cash */}
               {currentUser && (
                 <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
                   <div className="flex justify-between text-[11px] font-bold text-slate-500">
@@ -240,7 +336,7 @@ export default function CartCheckout({
       {step === 'payment' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
           
-          {/* Payment method checklist selection */}
+          {/* Payment Method Selection */}
           <div className="lg:col-span-2 space-y-6">
             <h3 className="text-xl font-bold text-slate-800">Metode Pembayaran Virtual</h3>
             
@@ -276,28 +372,23 @@ export default function CartCheckout({
               </button>
             </div>
 
-            {/* Render selected configuration simulator */}
+            {/* Simulators */}
             <div className="p-6 bg-slate-50 border border-slate-200 rounded-3xl">
               {paymentMethod === 'qris' && (
                 <div className="flex flex-col items-center text-center space-y-4">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Scan Kode QRIS Mandiri</h4>
                   <div className="p-3 bg-white border border-slate-200 rounded-xl">
-                    {/* Simulated SVG dynamic Barcode */}
                     <svg className="w-36 h-36" viewBox="0 0 100 100">
                       <rect width="100" height="100" fill="white" />
                       <rect x="10" y="10" width="20" height="20" fill="black" />
                       <rect x="14" y="14" width="12" height="12" fill="white" />
                       <rect x="16" y="16" width="8" height="8" fill="black" />
-                      
                       <rect x="70" y="10" width="20" height="20" fill="black" />
                       <rect x="74" y="14" width="12" height="12" fill="white" />
                       <rect x="76" y="16" width="8" height="8" fill="black" />
-                      
                       <rect x="10" y="70" width="20" height="20" fill="black" />
                       <rect x="14" y="74" width="12" height="12" fill="white" />
                       <rect x="16" y="76" width="8" height="8" fill="black" />
-
-                      {/* Random center points simulating QRIS */}
                       <rect x="40" y="40" width="15" height="15" fill="black" />
                       <rect x="45" y="45" width="5" height="5" fill="white" />
                       <rect x="55" y="60" width="10" height="5" fill="black" />
@@ -308,7 +399,7 @@ export default function CartCheckout({
                   </div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">NMID: ID1020260279883</span>
                   <p className="text-[11px] text-slate-500 max-w-xs leading-relaxed">
-                    Aplikasi kami otomatis mensimulasikan otentikasi pembayaran. Cukup klik tombol 'Bayar Sekarang' di samping untuk merilis dana dari Saldo Digital Anda.
+                    Sistem otomatis menguji otentikasi pembayaran. Klik 'Bayar Sekarang' untuk merilis dana dari Saldo Digital Anda.
                   </p>
                 </div>
               )}
@@ -324,7 +415,7 @@ export default function CartCheckout({
                     <span className="font-bold text-[10px] bg-indigo-50 text-indigo-700 px-2 py-1 rounded">BCA AUTO CHECK</span>
                   </div>
                   <p className="text-[11px] text-slate-400">
-                    Sistem akan mendeteksi penyelesaian transfer secara realtime pasca dana dirilis dari balance Anda.
+                    Sistem mendeteksi transfer secara otomatis setelah konfirmasi bayar dikirimkan.
                   </p>
                 </div>
               )}
@@ -419,9 +510,7 @@ export default function CartCheckout({
                 {paying ? (
                   <RefreshCw className="w-4 h-4 animate-spin" />
                 ) : (
-                  <>
-                    <span>Bayar Sekarang ({formatIDR(grandTotal)})</span>
-                  </>
+                  <span>Bayar Sekarang ({formatIDR(grandTotal)})</span>
                 )}
               </button>
               
